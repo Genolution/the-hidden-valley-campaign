@@ -3,6 +3,12 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-08 — espaço de trabalho com dois repositórios
+
+- Pasta reorganizada pelo usuário: `Base/` (este repositório) e `The Hidden Valey/` (clone do fork `Genolution/the-hidden-valley-campaign`, com `upstream` = base e push para a base desativado). PDFs ficam na pasta-mãe, fora dos dois repositórios; `../CLAUDE.md` descreve o fluxo (código na base → `git pull upstream main` no fork).
+- No fork: `campanha.js` recuperado do commit `34d73d3`, `site.js` com `repo` do fork, `docs/CAMPANHA.md` com as pendências da mesa (as que saíram do backlog da base).
+- Skill `/verificar`: aba `reino` na lista.
+
 ## 2026-10-08 — ficha do reino, repositório base/vitrine, site.js e Nova campanha
 
 - **Decisão (usuário):** este repositório vira a **base** do projeto (conteúdo vazio). A campanha do usuário irá para um fork/repositório próprio com site próprio, criado por ele depois. O site atual do Netlify vira **vitrine** (sem publicar, com botão "Crie o seu" → fork).

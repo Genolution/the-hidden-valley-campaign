@@ -12,7 +12,7 @@ description: Verifica o Guia do Reino após uma edição — sintaxe de app.js e
    ```
 
    Se a mudança for visual, acrescente `-Screenshot "#/<aba>" -Out "<scratchpad>\<nome>.png"`
-   (abas: `turno`, `atividades`, `estruturas`, `guerra`, `talentos`, `regras`, `criacao`;
+   (abas: `reino`, `turno`, `atividades`, `estruturas`, `guerra`, `talentos`, `regras`, `criacao`;
    para abrir um modal: `#/estruturas/structure:town-hall`). Depois abra o PNG com a ferramenta Read e confira.
 
 2. Interprete:

@@ -21,14 +21,14 @@ Projeto de longo prazo, evoluído em sessões. **Leia este arquivo primeiro e s�
 | `guia-reino/data/campanha.js` | conteúdo próprio da campanha (`KM.campaign`), mesclado às coleções do livro com `source: "campanha"`. **Vazio neste repositório (base)**: conteúdo de mesa vai no fork/repositório da campanha, nunca nos arquivos do livro |
 | `guia-reino/data/reino.js` | ficha do reino (`KM.reino`), só valores-base; vazia na base. Esquema em `docs/modelo-de-dados.md` |
 | `guia-reino/data/site.js` | `KM.site`: repositório/branch/pasta onde o modo mestre publica (`repo` vazio na base), `upstream` e `showcaseHost` (vitrine) |
-| `*.pdf` na raiz (exceto o Player's Guide) | handouts da campanha (1 página cada), fonte dos itens de `campanha.js` da campanha; legíveis com Read |
+| `../*.pdf` (pasta-mãe, fora do Git; exceto o Player's Guide) | handouts da campanha (1 página cada), fonte dos itens de `campanha.js` do repositório da campanha; legíveis com Read |
 | `guia-reino/LEIAME.md` | leia-me para usuários (abas, atalhos) |
 | `docs/regras-kingmaker.md` | **referência de regras**: mapa página→arquivo/id, tabelas-chave, cadeias de upgrade |
 | `docs/modelo-de-dados.md` | campos de cada tipo de entidade e mini-markdown do `text` |
 | `docs/HISTORICO.md` | log das sessões (decisões, linha de base do check) |
 | `docs/BACKLOG.md` | pendências e ideias |
 | `tools/verificar.ps1` | verificação automática (sintaxe + selfCheck + screenshot opcional) |
-| `Kingmaker+Players+Guide.pdf` | fonte original, ~40 MB — **não ler** (ver abaixo) |
+| `../Kingmaker+Players+Guide.pdf` | fonte original, ~40 MB — **não ler** (ver abaixo) |
 
 ## Regras do jogo / validação
 
@@ -57,7 +57,7 @@ Projeto de longo prazo, evoluído em sessões. **Leia este arquivo primeiro e s�
 - **Estado no navegador** (`store()` → localStorage, chaves `km-*`): `km-hide-unavailable`, `km-act`, `km-st`, `km-war`, `km-open`, `km-theme`; no modo mestre `km-campaign-draft`, `km-reino-draft`, `km-gh-token`. (`km-kingdom`, a antiga configuração de perícias, é apagada ao carregar.)
 - **Cliques:** qualquer elemento com `data-open="tipo:id"` abre o modal (delegação global); por isso links dentro de linhas de tabela abrem o alvo, não a linha.
 - **`selfCheck()`:** roda com `index.html?check` e despeja JSON em `<pre id="selfcheck">` (inclui `campaign`, `campaignInactive`, `site`, `kingdom`, `duplicateIds`, `campaignUnknownKeys`, `kingdomBadRefs`).
-- **Repositório e deploy:** este é o **repositório base** (`diego-duarte/pf2-easy-kingdom-management`, público, branch `main`), com `campanha.js`/`reino.js` vazios; o conteúdo da mesa do usuário vai num fork/repositório próprio da campanha (com site próprio). O site https://pf2-easy-kingdom-management.netlify.app/ é a **vitrine** (publicar desativado). O Netlify publica a pasta `guia-reino/` (`netlify.toml`) a cada push. **Push = publicar**: só faça push com o ok do usuário. Todos os `*.pdf` ficam fora do Git (`.gitignore`: direitos da Paizo e spoilers).
+- **Repositório e deploy:** este é o **repositório base** (`diego-duarte/pf2-easy-kingdom-management`, público, branch `main`), com `campanha.js`/`reino.js` vazios; o conteúdo da mesa do usuário vai no fork `Genolution/the-hidden-valley-campaign` (pasta `../The Hidden Valey`, ver `../CLAUDE.md`; num fork, os dados e pendências da mesa ficam em `docs/CAMPANHA.md`). O site https://pf2-easy-kingdom-management.netlify.app/ é a **vitrine** (publicar desativado). O Netlify publica a pasta `guia-reino/` (`netlify.toml`) a cada push. **Push = publicar**: só faça push com o ok do usuário. Todos os `*.pdf` ficam fora do Git (`.gitignore`: direitos da Paizo e spoilers).
 - **Git:** instalado em `C:\Program Files\Git\cmd\git.exe` (terminais abertos antes da instalação não têm no PATH — use o caminho completo). Identidade configurada só no repo, com e-mail noreply do GitHub.
 
 ## Convenções
