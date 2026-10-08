@@ -1,0 +1,4 @@
+# Site estático: sem build; publica só a pasta do app.
+[build]
+  publish = "guia-reino"
+  command = ""

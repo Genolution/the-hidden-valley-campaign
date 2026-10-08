@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guia do Reino — Kingmaker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/turno" title="Início">
+        <span class="brand-crown" aria-hidden="true">♛</span>
+        <span class="brand-text">Guia do Reino <small>Kingmaker · PF2e</small></span>
+      </a>
+      <div class="search-wrap">
+        <input id="search" type="search" placeholder="Buscar atividade, estrutura, regra…  ( / )" autocomplete="off" aria-label="Busca global">
+        <div id="search-results" class="search-results" hidden></div>
+      </div>
+      <div class="topbar-actions">
+        <button id="btn-kingdom" class="btn btn-ghost" title="Configurar perícias do reino">⚙ Meu Reino</button>
+        <button id="btn-theme" class="btn btn-ghost btn-icon" title="Alternar tema claro/escuro" aria-label="Alternar tema">◐</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <a href="#/turno" data-tab="turno">Turno do Reino</a>
+      <a href="#/atividades" data-tab="atividades">Atividades</a>
+      <a href="#/estruturas" data-tab="estruturas">Estruturas</a>
+      <a href="#/guerra" data-tab="guerra">Guerra</a>
+      <a href="#/talentos" data-tab="talentos">Talentos</a>
+      <a href="#/regras" data-tab="regras">Regras</a>
+      <a href="#/criacao" data-tab="criacao">Criação do Reino</a>
+    </nav>
+  </header>
+
+  <main id="view" class="view" tabindex="-1"></main>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head">
+        <button class="btn btn-ghost btn-icon" id="modal-back" title="Voltar" aria-label="Voltar" hidden>←</button>
+        <div class="modal-titles">
+          <div class="modal-kind" id="modal-kind"></div>
+          <h2 id="modal-title"></h2>
+          <div class="modal-sub" id="modal-sub"></div>
+        </div>
+        <button class="btn btn-ghost btn-icon" data-close title="Fechar (Esc)" aria-label="Fechar">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    Referência não oficial para uso da mesa, compilada do <em>Kingmaker Player's Guide</em> (Paizo). Resumos em português; texto completo das regras no original em inglês.
+  </footer>
+
+  <script src="data/turn.js"></script>
+  <script src="data/rules.js"></script>
+  <script src="data/activities.js"></script>
+  <script src="data/skills.js"></script>
+  <script src="data/structures.js"></script>
+  <script src="data/warfare.js"></script>
+  <script src="data/campanha.js"></script>
+  <script src="assets/app.js"></script>
+  <script src="assets/editor.js"></script>
+</body>
+</html>

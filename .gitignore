@@ -1,0 +1,8 @@
+# PDFs ficam só no computador do mestre: o livro (direitos da Paizo, ~40 MB) e os handouts
+# da campanha (spoilers; o repositório é público). O conteúdo transcrito está em guia-reino/data/.
+*.pdf
+
+# Configurações locais do Claude Code / sistema
+.claude/settings.local.json
+Thumbs.db
+desktop.ini
