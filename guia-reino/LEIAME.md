@@ -37,9 +37,6 @@ Ou, pelo terminal (da pasta acima): `powershell -NoProfile -ExecutionPolicy Bypa
 
 **Link do card:** no campo **Fonte / link do card** (`sourceRef`), cole o link do card (ex.: do pf2 template tools). No site aparece o botão **Ver card ↗**, que abre o card numa nova aba.
 
-**Editar pelo site (modo mestre):** na faixa do topo, use **☰ Gerenciar campanha** (lista, ativar/desativar, editar, excluir), **+ Atividade** ou **+ Estrutura**; no modal de um item da campanha há **✎ Editar**. As mudanças valem na hora para você, mas ficam salvas só no seu navegador. Para os jogadores verem:
-1. clique em **⤓ Baixar campanha.js**;
-2. substitua `data/campanha.js` por esse arquivo;
-3. publique o site no Netlify.
+**Editar pelo site (modo mestre):** na faixa do topo, use **☰ Gerenciar campanha** (lista, ativar/desativar, editar, excluir), **+ Atividade** ou **+ Estrutura**; no modal de um item da campanha há **✎ Editar**. As mudanças valem na hora para você, mas ficam salvas só no seu navegador (rascunho). Para os jogadores verem, clique em **☁ Publicar**: o `campanha.js` é gravado no GitHub e o Netlify atualiza o site em instantes; o aviso acompanha até o site estar no ar e então o rascunho é descartado sozinho. **Descartar rascunho** volta ao arquivo publicado.
 
-Depois de publicado, o rascunho local é descartado sozinho. **Descartar rascunho** volta ao arquivo publicado.
+Na primeira vez, o Publicar pede um **token do GitHub**, criado uma única vez, com acesso só a este repositório e permissão *Contents: Read and write*. O próprio site mostra o passo a passo; o token fica guardado só naquele navegador. Para trocar ou esquecer o token, use **⚙ Token** no painel. Sem token, dá para publicar à mão: use **⤓ Baixar** e envie o arquivo para `guia-reino/data/` no GitHub (*Add file → Upload files*).

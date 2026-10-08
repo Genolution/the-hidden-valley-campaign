@@ -138,6 +138,14 @@ button, input, select { font: inherit; color: inherit; }
 .ed-err { color: var(--cf); font-weight: 600; margin-top: 10px; }
 .ed-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; position: sticky; bottom: -22px; background: var(--surface); padding: 10px 0 12px; border-top: 1px solid var(--line); }
 table.ed-list tbody tr { cursor: default; }
+.ed-steps { margin: 6px 0 12px; padding-left: 22px; font-size: 14px; line-height: 1.6; }
+.ed-steps a, .ed-toast a { color: var(--link); }
+.ed-toast { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 200; width: max-content; max-width: calc(100% - 32px);
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line-strong); border-left: 4px solid var(--ph-event);
+  border-radius: 10px; box-shadow: var(--shadow-lg); padding: 8px 8px 8px 14px; font-size: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ed-toast[hidden] { display: none; }
+.ed-toast.ok { border-left-color: var(--cs); }
+.ed-toast.err { border-left-color: var(--cf); color: var(--cf); }
 @media (max-width: 600px) {
   .ed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ed-row, .ed-row.bonus { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }

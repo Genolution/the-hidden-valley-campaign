@@ -1107,7 +1107,7 @@
     gmBar.className = 'gm-banner';
     gmBar.innerHTML = '<b>Modo mestre</b> — itens de campanha inativos visíveis (selo <span class="chip inactive">Inativo</span>), ' + campaignInactive.length + ' inativo(s). ' +
       '<button type="button" class="btn btn-sm" data-ed-panel>☰ Gerenciar campanha</button> <button type="button" class="btn btn-sm" data-ed-new="activities">+ Atividade</button> <button type="button" class="btn btn-sm" data-ed-new="structures">+ Estrutura</button> ' +
-      (campaignDraft ? '<span class="gm-draft">⚠ Rascunho local não publicado. <button type="button" class="btn btn-sm btn-primary" data-ed-download>⤓ Baixar campanha.js</button> <button type="button" class="btn btn-sm" data-ed-discard>Descartar rascunho</button></span> ' : '') +
+      (campaignDraft ? '<span class="gm-draft">⚠ Rascunho local não publicado. <button type="button" class="btn btn-sm btn-primary" data-ed-publish>☁ Publicar</button> <button type="button" class="btn btn-sm" data-ed-download>⤓ Baixar</button> <button type="button" class="btn btn-sm" data-ed-discard>Descartar rascunho</button></span> ' : '') +
       '<a href="' + esc(location.pathname) + '" data-gm-exit>Sair do modo mestre</a>';
     document.body.insertBefore(gmBar, view);
     gmBar.querySelector('[data-gm-exit]').addEventListener('click', function (ev) { ev.preventDefault(); location.href = location.pathname + location.hash; });

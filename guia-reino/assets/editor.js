@@ -1,7 +1,8 @@
 /* Editor do conteúdo da campanha — só no modo mestre (?mestre).
  * As alterações ficam num rascunho no navegador (localStorage 'km-campaign-draft'), que o app.js
- * carrega no lugar de data/campanha.js enquanto estiver no modo mestre. Para os jogadores verem,
- * é preciso baixar o campanha.js gerado e publicá-lo. */
+ * carrega no lugar de data/campanha.js enquanto estiver no modo mestre. Para os jogadores verem:
+ * "Publicar" grava o arquivo no GitHub via API (token pessoal em localStorage 'km-gh-token') e o
+ * Netlify publica; ou, manualmente, baixar o campanha.js gerado e enviá-lo ao repositório. */
 (function () {
   'use strict';
 
@@ -35,7 +36,7 @@
     '// "Inativo" e a "condition" (anotação livre do que ativa o item).',
     '// Atenção: oculto não é secreto — quem abrir este arquivo no navegador vê todo o conteúdo.',
     '//',
-    '// Este arquivo pode ser gerado pelo editor do modo mestre (☰ Gerenciar campanha → Baixar campanha.js).'
+    '// Este arquivo pode ser gerado pelo editor do modo mestre (☰ Gerenciar campanha → Publicar / Baixar).'
   ].join('\n');
 
   /* ---------- utilidades ---------- */
@@ -105,18 +106,170 @@
     return -1;
   }
 
+  /* ---------- publicar no GitHub (o Netlify publica o site a cada commit na main) ---------- */
+  var GH = { repo: 'diego-duarte/pf2-easy-kingdom-management', branch: 'main', path: 'guia-reino/data/campanha.js' };
+  var TOKEN_KEY = 'km-gh-token';
+  var publishAfterToken = false;
+
+  function token(v) {
+    if (v === undefined) return U.store(TOKEN_KEY) || '';
+    if (v) U.store(TOKEN_KEY, v); else try { localStorage.removeItem(TOKEN_KEY); } catch (x) { /* ignore */ }
+  }
+  function b64encode(s) {
+    var b = new TextEncoder().encode(s), bin = '';
+    for (var i = 0; i < b.length; i++) bin += String.fromCharCode(b[i]);
+    return btoa(bin);
+  }
+  function b64decode(s) {
+    var bin = atob(String(s).replace(/\s/g, '')), b = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(b);
+  }
+  function parseCampaign(txt) {
+    var i = txt.indexOf('KM.campaign');
+    if (i < 0) return null;
+    try { return JSON.parse(txt.slice(txt.indexOf('{', i), txt.lastIndexOf('}') + 1)); } catch (x) { return null; }
+  }
+  function ghMsg(status, j) {
+    var m = j && j.message ? ' (' + j.message + ')' : '';
+    if (status === 401) return 'token inválido ou expirado' + m;
+    if (status === 403) return 'sem permissão: o token precisa de "Contents: Read and write" neste repositório, ou a regra da branch bloqueou' + m;
+    if (status === 404) return 'arquivo ou repositório não encontrado — o token tem acesso a ' + GH.repo + '?' + m;
+    if (status === 409 || status === 422) return 'conflito: o arquivo mudou no GitHub durante a publicação; tente de novo' + m;
+    return 'erro ' + status + m;
+  }
+  function gh(method, body) {
+    var url = 'https://api.github.com/repos/' + GH.repo + '/contents/' + GH.path + (method === 'GET' ? '?ref=' + GH.branch : '');
+    return fetch(url, {
+      method: method, cache: 'no-store',
+      headers: { 'Authorization': 'Bearer ' + token(), 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) {
+      return r.json().then(null, function () { return {}; }).then(function (j) {
+        if (!r.ok) throw new Error(ghMsg(r.status, j));
+        return j;
+      });
+    });
+  }
+  // Resumo das mudanças para a mensagem do commit: +novo, −removido, ~alterado, ativado/desativado
+  function changes(base, next) {
+    var out = [], keys = {};
+    Object.keys(base || {}).concat(Object.keys(next || {})).forEach(function (k) { keys[k] = 1; });
+    Object.keys(keys).forEach(function (k) {
+      var b = {}, n = {};
+      ((base || {})[k] || []).forEach(function (e) { b[e.id] = e; });
+      ((next || {})[k] || []).forEach(function (e) { n[e.id] = e; });
+      Object.keys(n).forEach(function (id) {
+        if (!b[id]) { out.push('+' + id); return; }
+        if (JSON.stringify(b[id]) === JSON.stringify(n[id])) return;
+        var c = U.clone(b[id]); c.active = n[id].active;
+        if ((b[id].active === true) !== (n[id].active === true) && JSON.stringify(c) === JSON.stringify(n[id])) out.push((n[id].active === true ? 'ativado ' : 'desativado ') + id);
+        else out.push('~' + id);
+      });
+      Object.keys(b).forEach(function (id) { if (!n[id]) out.push('−' + id); });
+    });
+    return out;
+  }
+
+  var toastEl = null;
+  function toast(html, kind) {
+    if (!toastEl) { toastEl = document.createElement('div'); toastEl.className = 'ed-toast'; document.body.appendChild(toastEl); }
+    toastEl.className = 'ed-toast' + (kind ? ' ' + kind : '');
+    toastEl.innerHTML = html + ' <button type="button" class="btn btn-sm btn-ghost" data-ed-toast-close title="Fechar">✕</button>';
+    toastEl.hidden = !html;
+  }
+
+  function publish() {
+    if (!token()) { tokenPanel(true); return; }
+    var list = changes(A.campaign.file, work);
+    if (!list.length) { toast('Nada para publicar: o conteúdo é igual ao publicado.'); return; }
+    toast('☁ Lendo o <code>campanha.js</code> no GitHub…');
+    gh('GET').then(function (cur) {
+      var remote = parseCampaign(b64decode(cur.content || ''));
+      if (JSON.stringify(remote) !== JSON.stringify(A.campaign.file) &&
+        !confirm('O campanha.js no GitHub foi alterado depois que esta página foi carregada (outro navegador, outra pessoa ou um commit).\n\nPublicar agora vai SOBRESCREVER essas mudanças. Continuar?')) { toast(''); return null; }
+      toast('☁ Publicando…');
+      var msg = 'Campanha (editor do mestre): ' + list.slice(0, 12).join(', ') + (list.length > 12 ? ' e mais ' + (list.length - 12) : '');
+      return gh('PUT', { message: msg, content: b64encode(fileText()), sha: cur.sha, branch: GH.branch }).then(function (res) {
+        U.store(DRAFT_KEY, work);
+        dirty = false;
+        waitDeploy(res && res.commit ? res.commit.sha : '');
+      });
+    }).then(null, function (e) { toast('Não foi possível publicar: ' + esc(e.message), 'err'); });
+  }
+  // Confere o arquivo servido pelo site até ele refletir a publicação (deploy do Netlify concluído)
+  function waitDeploy(sha) {
+    var target = JSON.stringify(work), tries = 0;
+    var commitLink = sha ? ' <a href="https://github.com/' + GH.repo + '/commit/' + esc(sha) + '" target="_blank" rel="noopener noreferrer">commit ' + esc(sha.slice(0, 7)) + '</a>' : '';
+    function check() {
+      tries++;
+      fetch('data/campanha.js?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (txt) {
+        if (JSON.stringify(parseCampaign(txt)) === target) {
+          try { localStorage.removeItem(DRAFT_KEY); } catch (x) { /* ignore */ }
+          toast('✔ Publicado e no ar para os jogadores.' + commitLink + ' Recarregando…', 'ok');
+          setTimeout(function () { location.reload(); }, 1500);
+        } else next();
+      }, next);
+    }
+    function next() {
+      if (tries >= 40) {
+        toast('✔ Commit feito.' + commitLink + ' O Netlify ainda está publicando — recarregue a página em instantes. <a href="https://app.netlify.com/projects/pf2-easy-kingdom-management/deploys" target="_blank" rel="noopener noreferrer">Ver deploys</a>', 'ok');
+        return;
+      }
+      toast('☁ Commit feito.' + commitLink + ' Aguardando o Netlify publicar… (' + tries * 5 + 's)');
+      setTimeout(check, 5000);
+    }
+    next();
+  }
+
+  function tokenPanel(thenPublish) {
+    publishAfterToken = !!thenPublish;
+    var has = !!token();
+    var h = '<div class="ed-note">O botão <b>Publicar</b> grava o <code>campanha.js</code> direto no GitHub (' + esc(GH.repo) + ', branch ' + esc(GH.branch) + ') e o Netlify publica o site sozinho. ' +
+      'Para isso ele precisa de um <b>token pessoal</b> do GitHub, guardado <b>só neste navegador</b>. Não salve o token em computadores compartilhados.</div>' +
+      '<div class="block-title">Como criar o token (uma vez)</div><ol class="ed-steps">' +
+      '<li>Abra <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">GitHub → Fine-grained token → Generate new token</a>.</li>' +
+      '<li><b>Token name:</b> “Guia do Reino – editor”; <b>Expiration:</b> o prazo que preferir (ex.: 1 ano).</li>' +
+      '<li><b>Repository access:</b> <i>Only select repositories</i> → <code>' + esc(GH.repo.split('/')[1]) + '</code>.</li>' +
+      '<li><b>Permissions → Repository permissions → Contents:</b> <i>Read and write</i> (nada mais).</li>' +
+      '<li>Clique em <b>Generate token</b>, copie o valor (começa com <code>github_pat_</code>) e cole abaixo.</li></ol>' +
+      '<form id="ed-token-form" autocomplete="off"><label class="ed-f wide"><span>Token do GitHub</span>' +
+      '<input name="tok" type="password" placeholder="' + (has ? 'token salvo — cole outro para trocar' : 'github_pat_…') + '"></label>' +
+      '<div id="ed-err" class="ed-err" hidden></div><div class="ed-actions">' +
+      '<button type="submit" class="btn btn-primary">Salvar token' + (thenPublish ? ' e publicar' : '') + '</button>' +
+      (has ? '<button type="button" class="btn" data-ed-forget>Esquecer token</button>' : '') +
+      '<button type="button" class="btn" data-ed-panel>Voltar</button></div></form>';
+    U.showPanel('Modo mestre', 'Token do GitHub', has ? 'Token salvo neste navegador' : 'Nenhum token salvo', h);
+  }
+  function saveToken() {
+    var f = document.getElementById('ed-token-form'), v = String(f.elements.tok.value || '').trim();
+    if (!v) { if (token() && publishAfterToken) { publish(); return; } err('Cole o token.'); return; }
+    var old = token();
+    token(v);
+    gh('GET').then(function () {
+      toast('✔ Token salvo e com acesso ao repositório.', 'ok');
+      if (publishAfterToken) { publishAfterToken = false; panel(); publish(); } else panel();
+    }, function (e) {
+      token(old || null);
+      err('Token não aceito: ' + e.message);
+    });
+  }
+
   /* ---------- painel ---------- */
   function panel() {
     var h = '<div class="ed-note">As alterações ficam só <b>neste navegador</b> (rascunho) e aparecem no modo mestre. ' +
-      'Para os jogadores verem: <b>Baixar campanha.js</b>, substituir <code>guia-reino/data/campanha.js</code> e publicar no Netlify. ' +
+      'Para os jogadores verem, clique em <b>☁ Publicar</b>: o arquivo é gravado no GitHub e o Netlify atualiza o site em instantes ' +
+      '(alternativa manual: <b>Baixar campanha.js</b> e enviar para <code>guia-reino/data/</code> no GitHub). ' +
       'Depois de publicado, o rascunho é descartado automaticamente.</div>';
     h += '<div class="ed-bar">' +
       '<button type="button" class="btn btn-sm" data-ed-new="activities">+ Atividade</button>' +
       '<button type="button" class="btn btn-sm" data-ed-new="structures">+ Estrutura</button>' +
       '<button type="button" class="btn btn-sm" data-ed-new="json">+ Outro tipo (JSON)</button><span class="sep"></span>' +
       '<button type="button" class="btn btn-sm' + (dirty ? ' btn-primary' : '') + '" data-ed-apply>✔ Salvar e aplicar</button>' +
-      '<button type="button" class="btn btn-sm' + (!dirty && A.campaign.draft ? ' btn-primary' : '') + '" data-ed-download>⤓ Baixar campanha.js</button>' +
+      '<button type="button" class="btn btn-sm' + (!dirty && A.campaign.draft ? ' btn-primary' : '') + '" data-ed-publish>☁ Publicar</button>' +
+      '<button type="button" class="btn btn-sm" data-ed-download>⤓ Baixar campanha.js</button>' +
       '<button type="button" class="btn btn-sm" data-ed-copy>⧉ Copiar</button>' +
+      '<button type="button" class="btn btn-sm" data-ed-token title="Token do GitHub usado pelo Publicar">⚙ Token' + (token() ? ' ✓' : '') + '</button>' +
       (A.campaign.draft ? '<button type="button" class="btn btn-sm" data-ed-discard>Descartar rascunho</button>' : '') +
       (dirty ? '<span class="ed-dirty">Alterações ainda não aplicadas</span>' : '') +
       '</div>';
@@ -392,11 +545,15 @@
 
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (ev) {
-    var t = ev.target.closest('[data-ed-panel],[data-ed-new],[data-ed-edit],[data-ed-del],[data-ed-apply],[data-ed-download],[data-ed-copy],[data-ed-discard],[data-ed-add-row],[data-ed-rm-row],[data-ed-gen-text],[data-ed-gen-stats],[data-ed-as-json]');
+    var t = ev.target.closest('[data-ed-panel],[data-ed-new],[data-ed-edit],[data-ed-del],[data-ed-apply],[data-ed-download],[data-ed-copy],[data-ed-discard],[data-ed-add-row],[data-ed-rm-row],[data-ed-gen-text],[data-ed-gen-stats],[data-ed-as-json],[data-ed-publish],[data-ed-token],[data-ed-forget],[data-ed-toast-close]');
     if (!t) return;
     ev.preventDefault();
     var d = t.dataset;
     if ('edPanel' in d) panel();
+    else if ('edPublish' in d) publish();
+    else if ('edToken' in d) tokenPanel(false);
+    else if ('edForget' in d) { token(null); toast('Token removido deste navegador.'); panel(); }
+    else if ('edToastClose' in d) toast('');
     else if ('edNew' in d) open(d.edNew, -1, d.edNew === 'json' ? 'json' : null);
     else if ('edEdit' in d) {
       var p = d.edEdit.split('|'), i = findIdx(p[0], p[1]);
@@ -438,7 +595,9 @@
     }
   });
   document.addEventListener('submit', function (ev) {
-    if (ev.target.getAttribute('id') === 'ed-form') { ev.preventDefault(); submit(); }
+    var id = ev.target.getAttribute('id');
+    if (id === 'ed-form') { ev.preventDefault(); submit(); }
+    else if (id === 'ed-token-form') { ev.preventDefault(); saveToken(); }
   });
   window.addEventListener('beforeunload', function (ev) {
     if (dirty) { ev.preventDefault(); ev.returnValue = ''; }

@@ -3,6 +3,14 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-08 — botão Publicar (GitHub API) + cabeçalhos de segurança
+
+- `netlify.toml`: CSP (scripts só do site, estilos inline permitidos, Google Fonts, `connect-src` com `api.github.com`), `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`. Testado com servidor local (HttpListener) aplicando os mesmos cabeçalhos; confirmado no ar.
+- Editor: **☁ Publicar** (painel e faixa do modo mestre) grava `guia-reino/data/campanha.js` via API de conteúdo do GitHub com token fine-grained (Contents R/W, só este repo) salvo no `localStorage`. Tela "⚙ Token" com passo a passo, validação do token (GET) e "Esquecer token".
+- Proteções: confirmação se o arquivo no GitHub mudou desde o carregamento da página (evita sobrescrever); mensagens de erro claras para 401/403/404/409; mensagem de commit lista as mudanças (+novo, −removido, ~alterado, ativado/desativado).
+- Após o commit, acompanha o deploy consultando `data/campanha.js` a cada 5 s (até ~3 min); quando o site reflete a publicação, apaga o rascunho e recarrega.
+- Testado com a API do GitHub simulada (sem commits reais): sem token, token salvo, nada a publicar, sucesso + espera do deploy, conflito cancelado, erro 403. Falta o teste real com o token do usuário.
+
 ## 2026-10-08 — link do card (`sourceRef`) + Netlify
 
 - `sourceRef` com URL `http(s)` vira o chip-link "Ver card ↗ <domínio>" no modal (todos os usuários; `target=_blank`, `rel=noopener`). Só URLs `http(s)` viram link (sem `javascript:`). Texto livre (nome do PDF) agora só aparece no modo mestre. Campo do editor renomeado para "Fonte / link do card".
