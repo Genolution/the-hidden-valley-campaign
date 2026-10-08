@@ -57,7 +57,7 @@ Projeto de longo prazo, evoluído em sessões. **Leia este arquivo primeiro e s�
 - ES5 puro (`var`, `function`, sem arrow/let/const/template strings) — mantenha.
 - Strings de UI em PT-BR; nomes de regras em inglês com `namePt` ao lado.
 - Sempre escape conteúdo com `esc()` ao montar HTML; use `inline()`/`rich()` para texto com markup.
-- Nada de bibliotecas externas além da fonte do Google Fonts.
+- Nada de bibliotecas externas além da fonte do Google Fonts. O `netlify.toml` define um **CSP** (scripts só do próprio site, sem inline/eval; `connect-src` só `'self'` e `api.github.com`): qualquer origem externa nova, `<script>` inline ou `onclick=` quebra em produção — atualize o CSP junto. Testes locais via `file://` não aplicam o CSP; para testar, sirva a pasta com um HttpListener do PowerShell aplicando os cabeçalhos do `netlify.toml`.
 - Comentários escassos, em português, como no código existente.
 
 ## Fluxo de uma sessão
