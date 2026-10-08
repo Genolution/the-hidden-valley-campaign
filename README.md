@@ -1,5 +1,9 @@
 # Guia do Reino — Kingmaker (PF2e)
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b8d5a3f9-89cf-47f0-a91e-ce6c55a1a317/deploy-status)](https://app.netlify.com/projects/pf2-easy-kingdom-management/deploys)
+
+**Site:** https://pf2-easy-kingdom-management.netlify.app/
+
 Referência rápida, em português, das regras de gerenciamento de reino do *Kingmaker Player's Guide* (Paizo), com conteúdo próprio da campanha.
 Site estático (HTML + JS, sem build), publicado no Netlify a partir da pasta [`guia-reino/`](guia-reino/).
 
