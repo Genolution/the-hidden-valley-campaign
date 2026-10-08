@@ -3,6 +3,14 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-08 — repositório no GitHub
+
+- Git for Windows instalado (winget). Repositório público `diego-duarte/pf2-easy-kingdom-management`, branch `main`, commit inicial `08b06b3`.
+- **Decisão (usuário):** todos os PDFs fora do Git (`*.pdf` no `.gitignore`) — livro da Paizo e handouts com spoilers.
+- Identidade do commit só no repo local, e-mail `diego-duarte@users.noreply.github.com` (não expor e-mail real em repo público).
+- Criados `netlify.toml` (publish = `guia-reino`, sem build) e `README.md` (página do repositório).
+- Pendente (usuário): ligar o site do Netlify ao repositório. Depois disso: botão "Publicar" no editor via API do GitHub.
+
 ## 2026-10-08 — editor de campanha no modo mestre
 
 - Novo `assets/editor.js` (carregado após `app.js`; inerte fora do modo mestre). Painel "Gerenciar campanha" (lista, ativar/desativar, editar, excluir), formulários de atividade e estrutura, modo JSON para qualquer coleção, botão "Editar" no modal de itens da campanha.

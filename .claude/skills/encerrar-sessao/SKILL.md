@@ -19,4 +19,6 @@ Objetivo: a próxima sessão deve entender o estado do projeto lendo só `CLAUDE
 6. **`docs/modelo-de-dados.md`** — atualize se surgiu campo/tipo novo nos dados.
 7. **`docs/regras-kingmaker.md`** — atualize se você confirmou ou corrigiu alguma regra/número.
 
+8. **Git** — faça commit das mudanças com mensagem descritiva em português (`git status` antes: nenhum `.pdf` pode entrar). **Pergunte antes do `git push`**: o push dispara o deploy no Netlify e publica para os jogadores.
+
 Seja conciso: entradas de histórico com 3–8 tópicos. Use datas absolutas.
