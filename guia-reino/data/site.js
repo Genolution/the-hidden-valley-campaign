@@ -15,5 +15,6 @@ KM.site = {
   "root": "guia-reino",
   "deploysUrl": "https://app.netlify.com/projects/the-hidden-valey-campaign/deploys",
   "upstream": "diego-duarte/pf2-easy-kingdom-management",
-  "showcaseHost": "pf2-easy-kingdom-management.netlify.app"
+  "showcaseHost": "pf2-easy-kingdom-management.netlify.app",
+  "chat": "discord"
 };
