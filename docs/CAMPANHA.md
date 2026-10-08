@@ -5,6 +5,7 @@ Repositório da campanha (fork de `diego-duarte/pf2-easy-kingdom-management`). A
 `guia-reino/data/site.js` (publicação neste repositório). Código e documentação geral vêm da base.
 
 - **Site:** https://the-hidden-valey-campaign.netlify.app/ (mestre: `?mestre`). Deploys: https://app.netlify.com/projects/the-hidden-valey-campaign/deploys
+- **Discord:** rolagens enviadas ao canal da mesa (`"chat": "discord"` no `site.js`; webhook na variável `DISCORD_WEBHOOK_URL` do Netlify).
 
 - **Remotes:** `origin` = este fork; `upstream` = base (push desativado — mudanças de código são feitas na pasta `../Base`).
 - **Atualizar com a base:** `git pull upstream main` e depois `git push origin main` (com o ok do usuário: push = publicar).
@@ -15,8 +16,6 @@ Repositório da campanha (fork de `diego-duarte/pf2-easy-kingdom-management`). A
 
 ## Pendências da campanha
 
-- [ ] Token do GitHub com acesso a este repositório (Contents: Read and write) no navegador do mestre.
-- [ ] Preencher a ficha do reino (aba Reino, `?mestre`) e publicar.
 - [ ] **Sponsor Expedition** (atividade Cívica da campanha, habilitada pelo Expedition Pavilion): falta o texto. Quando chegar, cadastrar em `campanha.js` (`step: "civic"`) e trocar o negrito no texto do pavilhão por `[[activity:sponsor-expedition|Sponsor Expedition]]`.
 - [ ] Confirmar com o mestre: Silken Diplomacy é atividade de Liderança? Tem limite por turno?
 - [ ] Definir a `condition` real do Expedition Pavilion (hoje é um texto provisório).
