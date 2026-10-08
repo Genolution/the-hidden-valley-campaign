@@ -23,7 +23,8 @@
     '//   root        pasta do site dentro do repositório (onde fica o index.html)',
     '//   deploysUrl  link opcional da página de deploys do provedor (aparece após publicar)',
     '//   upstream    repositório base do projeto (botão "Crie o seu" na vitrine)',
-    '//   showcaseHost endereço da vitrine do projeto base: nesse endereço o Publicar fica desativado'
+    '//   showcaseHost endereço da vitrine do projeto base: nesse endereço o Publicar fica desativado',
+    '//   chat        opcional: serviço que recebe as rolagens ("discord"); o segredo fica numa variável de ambiente do provedor (.env.example)'
   ].join('\n');
 
   function siteConfig(s) {
@@ -31,7 +32,7 @@
     return {
       repo: String(s.repo || '').trim(), branch: String(s.branch || 'main').trim(),
       root: String(s.root == null ? 'guia-reino' : s.root).replace(/^\/+|\/+$/g, ''),
-      deploysUrl: String(s.deploysUrl || '').trim(), upstream: s.upstream || '', showcaseHost: s.showcaseHost || ''
+      deploysUrl: String(s.deploysUrl || '').trim(), upstream: s.upstream || '', showcaseHost: s.showcaseHost || '', chat: String(s.chat || '').trim()
     };
   }
   function validRepo(r) { return /^[\w.-]+\/[\w.-]+$/.test(r); }
@@ -222,6 +223,8 @@
       '<label class="ed-f"><span>Branch *</span><input name="branchName" value="' + esc(c.branch) + '"></label>' +
       '<label class="ed-f"><span>Pasta do site <small>no repositório</small></span><input name="rootDir" value="' + esc(c.root) + '"></label>' +
       '<label class="ed-f"><span>Página de deploys <small>opcional</small></span><input name="deploys" value="' + esc(c.deploysUrl) + '" placeholder="https://app.netlify.com/projects/…/deploys"></label>' +
+      '<label class="ed-f"><span>Chat das rolagens <small>opcional</small></span><select name="chatId"><option value="">nenhum</option>' +
+      ((window.KMIntegracoes && window.KMIntegracoes.CHATS) || []).map(function (x) { return '<option value="' + esc(x.id) + '"' + (c.chat === x.id ? ' selected' : '') + '>' + esc(x.name + ' (variável ' + x.envVars.join(', ') + ')') + '</option>'; }).join('') + '</select></label>' +
       '<label class="ed-f wide"><span>Token do GitHub *' + (has ? ' <small>já salvo — deixe vazio para manter</small>' : '') + '</span><input name="tok" type="password" placeholder="github_pat_…"></label>' +
       '</div>' + tokenSteps(c.repo) +
       '<div id="gh-err" class="ed-err" hidden></div><div class="ed-actions">' +
@@ -232,7 +235,7 @@
     var f = document.getElementById('gh-setup-form').elements;
     var next = siteConfig({
       repo: String(f.repoName.value).trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/, '').replace(/\/+$/, ''),
-      branch: f.branchName.value, root: f.rootDir.value, deploysUrl: f.deploys.value, upstream: cfg.upstream, showcaseHost: cfg.showcaseHost
+      branch: f.branchName.value, root: f.rootDir.value, deploysUrl: f.deploys.value, upstream: cfg.upstream, showcaseHost: cfg.showcaseHost, chat: f.chatId.value
     });
     if (!validRepo(next.repo)) { panelErr('Repositório inválido: use o formato usuario/repositorio.'); return; }
     if (!next.branch) { panelErr('Informe a branch.'); return; }
@@ -240,6 +243,7 @@
     if (tok) token(tok);
     if (!token()) { panelErr('Cole o token do GitHub.'); return; }
     var data = { repo: next.repo, branch: next.branch, root: next.root, deploysUrl: next.deploysUrl, upstream: next.upstream, showcaseHost: next.showcaseHost };
+    if (next.chat) data.chat = next.chat;
     var text = 'window.KM = window.KM || {};\n' + SITE_HEADER + '\nKM.site = ' + JSON.stringify(data, null, 2) + ';\n';
     toast('☁ Conferindo o acesso a ' + esc(next.repo) + '…');
     api('GET', 'repos/' + next.repo, null, false, next.repo).then(function () {

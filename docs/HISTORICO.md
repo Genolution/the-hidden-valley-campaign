@@ -3,6 +3,21 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-08 — v1.1.0: rolagem de testes, Discord, ⚙ Configurações e versionamento
+
+- **Versionamento** (decisão do usuário): `assets/version.js` (`KM.version`, semver), `CHANGELOG.md` para usuários, tags `vX.Y.Z` (sem `gh` CLI aqui: Releases, se quiser, pelo site do GitHub). 1.0.0 = commit `8614d3a`; esta sessão = 1.1.0. Rodapé mostra a versão; modo mestre compara com `version.js` do upstream (API do GitHub, 1×/sessão) e avisa na faixa.
+- **Rolagem:** 🎲 por perícia na ficha (painel) e "Rolar teste do reino" no modal das atividades do reino (perícias aceitas; "Any/Varies" = todas; 🔒 se falta grau). CD editável (padrão CD de Controle), grau com ±10 e 20/1 natural, texto do resultado (`quick` ou `outcomes`), rerrolar com Fama (só marca; o mestre desconta). Nome do jogador em `km-player`.
+- **Chat — decisão:** webhook nunca no repositório nem no navegador (um `.env` gerado no build acabaria servido no site). Função do servidor com **núcleo independente do provedor** (`integracoes/chat.mjs` + `integracoes/chat/discord.mjs`) e **adaptador** fino (`netlify/functions/chat.mjs`, endpoint `/api/chat`); segredo em variável de ambiente (`DISCORD_WEBHOOK_URL`, documentada em `.env.example`). A mensagem é montada no servidor a partir de campos validados; `allowed_mentions` vazio. Suportados inicialmente (pedido do usuário): Netlify e Discord; `docs/integracoes.md` explica como incluir outros (exemplo de adaptador Cloudflare, não testado).
+- `KM.site.chat` opcional (ausente = desligado), para o `site.js` da base não mudar valores e o `git pull upstream` no fork não conflitar; o assistente ganhou o seletor de chat e preserva o campo.
+- **Aba ⚙ Configurações** (`#/config`, só modo mestre, `assets/integracoes.js`): versão, publicação (repositório/token), hospedagens e chats suportados, estado da variável no servidor (GET `/api/chat`) e "Enviar mensagem de teste".
+- Testes: núcleo do servidor no Edge via `tools/servidor-teste.ps1` (novo; serve a pasta e simula `/api/chat`) com `fetch` simulado — 16/16 (validação, 400/405/413/503/502, embed, menções bloqueadas, mensagem de teste). Interface — 20/20 (versão no rodapé, aba só no mestre, rolagem na ficha e no modal, envio registrado no servidor simulado, rerrolagem, CD padrão, status e teste do chat, jogador rola e envia). Não testado: Netlify real executando a função e o Discord real (fazer no site da campanha).
+
+## 2026-10-08 — espaço de trabalho com dois repositórios
+
+- Pasta reorganizada pelo usuário: `Base/` (este repositório) e `The Hidden Valey/` (clone do fork `Genolution/the-hidden-valley-campaign`, com `upstream` = base e push para a base desativado). PDFs ficam na pasta-mãe, fora dos dois repositórios; `../CLAUDE.md` descreve o fluxo (código na base → `git pull upstream main` no fork).
+- No fork: `campanha.js` recuperado do commit `34d73d3`, `site.js` com `repo` do fork, `docs/CAMPANHA.md` com as pendências da mesa (as que saíram do backlog da base).
+- Skill `/verificar`: aba `reino` na lista.
+
 ## 2026-10-08 — ficha do reino, repositório base/vitrine, site.js e Nova campanha
 
 - **Decisão (usuário):** este repositório vira a **base** do projeto (conteúdo vazio). A campanha do usuário irá para um fork/repositório próprio com site próprio, criado por ele depois. O site atual do Netlify vira **vitrine** (sem publicar, com botão "Crie o seu" → fork).

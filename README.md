@@ -8,7 +8,21 @@ Referência rápida, em português, das regras de gerenciamento de reino do *Kin
 
 - **Ficha do reino** (aba *Reino*) mantida pelo mestre: atributos, ruína, Unrest, recursos (com rolagem dos Dados de Recurso), líderes, perícias com totais calculados (incluindo o bônus de cargo investido e a regra de não somar bônus do mesmo tipo), talentos e assentamentos;
 - **conteúdo próprio da campanha** (atividades, estruturas, talentos… fora do livro), com ativação item a item;
-- **modo mestre** (`?mestre`) que edita tudo pelo próprio site e **publica** com um commit no GitHub.
+- **modo mestre** (`?mestre`) que edita tudo pelo próprio site e **publica** com um commit no GitHub;
+- **rolagem dos testes do reino** (ficha e atividades), com envio opcional das rolagens ao **Discord**.
+
+Versão atual e novidades: [`CHANGELOG.md`](CHANGELOG.md).
+
+## Integrações suportadas
+
+| Tipo | Suportado | Observação |
+|---|---|---|
+| Hospedagem com envio ao chat | **Netlify** | o site em si é estático e roda em qualquer hospedagem; o envio ao chat usa uma função do servidor |
+| Chat (rolagens) | **Discord** | por webhook do canal, guardado numa variável de ambiente da hospedagem |
+
+A arquitetura separa o núcleo (`integracoes/`) dos adaptadores de cada provedor, para facilitar incluir outros
+(Cloudflare, Slack, Telegram…): veja [`docs/integracoes.md`](docs/integracoes.md). No site, o mestre vê essa lista e o
+estado de cada integração na aba **⚙ Configurações**.
 
 Site estático (HTML + JS, sem build, sem dependências), publicado a partir da pasta [`guia-reino/`](guia-reino/).
 
@@ -39,6 +53,7 @@ do **próprio repositório** e do **próprio site** ligado a ele. Neste reposit�
 
 **Cloudflare Pages**: *Workers & Pages → Create → Pages → Connect to Git* → repositório; *Build command* vazio,
 *Build output directory* `guia-reino`. Os cabeçalhos de segurança de [`guia-reino/_headers`](guia-reino/_headers) valem nos dois.
+O envio de rolagens ao chat ainda não tem adaptador para o Cloudflare (o resto funciona).
 
 GitHub Pages também serve o site (só arquivos estáticos), mas não aplica o `_headers` e publica apenas a raiz ou `/docs`
 — seria preciso um workflow do GitHub Actions para publicar a pasta `guia-reino`.
@@ -67,12 +82,28 @@ do projeto base; pode deixá-los como estão (a vitrine só vale no endereço da
 → *Generate token*. O token fica guardado **só no navegador** em que foi colado; não use em computador compartilhado.
 Se a branch tiver regras de proteção (exigir pull request), libere o seu usuário no *bypass* ou os commits do Publicar serão recusados.
 
-### 4. Use
+### 4. Rolagens no Discord (opcional)
+
+1. No Discord: *Configurações do canal → Integrações → Webhooks → Novo webhook* → escolha o canal → **Copiar URL do webhook**.
+2. No Netlify: *Site configuration → Environment variables → Add a variable* → chave `DISCORD_WEBHOOK_URL`, valor = a URL copiada.
+   **Não** coloque a URL em nenhum arquivo do repositório (veja [`.env.example`](.env.example)).
+3. Em `guia-reino/data/site.js`, acrescente `"chat": "discord"` (ou escolha *Discord* no assistente de configuração do modo mestre).
+4. Republique (o commit do passo 3 já republica; mudanças só na variável pedem *Deploys → Trigger deploy*) e, na aba
+   **⚙ Configurações** do modo mestre, use **Enviar mensagem de teste**.
+
+Quem quiser trocar de canal ou suspeitar de abuso: apague o webhook no Discord e cadastre outro na variável.
+
+### 5. Use
 
 - **Jogadores:** o endereço do site, sem parâmetros.
 - **Mestre:** o mesmo endereço com `?mestre`. Edite a ficha na aba *Reino* e o conteúdo da campanha em *☰ Gerenciar campanha*;
   tudo fica num rascunho no navegador até o **☁ Publicar**. Sem token, dá para **⤓ Baixar** o arquivo e enviá-lo para
   `guia-reino/data/` pelo GitHub (*Add file → Upload files*).
+- **Rolagens:** jogadores e mestre rolam pelo 🎲 da ficha ou pelo modal de uma atividade, informando o próprio nome.
+- **Atualizações:** o modo mestre avisa quando há versão nova no repositório base. Atualize com **Sync fork → Update branch**
+  no GitHub; seus arquivos de dados não mudam (novidades em [`CHANGELOG.md`](CHANGELOG.md)). Se o GitHub acusar conflito,
+  **não** use *Discard commits* (apagaria seu conteúdo): resolva com `git pull upstream main`, mantendo a sua versão dos
+  arquivos de `guia-reino/data/` que você edita.
 - **Nova campanha** (no painel *☰ Gerenciar campanha*): publica `campanha.js` e `reino.js` vazios para recomeçar no mesmo site
   (o conteúdo antigo continua no histórico do repositório).
 

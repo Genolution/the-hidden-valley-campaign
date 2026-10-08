@@ -104,9 +104,11 @@ estiver vago. Bônus de item de estruturas não entram (são por atividade e dep
 
 ## Configuração do site (`data/site.js`)
 
-`KM.site = {repo, branch, root, deploysUrl, upstream, showcaseHost}` — repositório e branch onde o modo mestre publica
+`KM.site = {repo, branch, root, deploysUrl, upstream, showcaseHost, chat?}` — repositório e branch onde o modo mestre publica
 (`repo` vazio = Publicar abre o assistente que grava este arquivo), pasta do site no repositório, link opcional dos deploys,
-repositório base (botão "Crie o seu") e endereço da vitrine (lá, ou com `?vitrine`, a publicação fica desativada).
+repositório base (botão "Crie o seu" e checagem de versão) e endereço da vitrine (lá, ou com `?vitrine`, a publicação fica
+desativada). `chat` (opcional, ex.: `"discord"`) liga o envio das rolagens a `/api/chat`; ausente = desligado. O segredo
+do chat nunca fica aqui (variável de ambiente; ver `docs/integracoes.md`).
 
 ## Ao adicionar/alterar dados
 

@@ -3,3 +3,9 @@
 [build]
   publish = "guia-reino"
   command = ""
+
+# Funções do servidor (integrações de chat): endpoint /api/chat, segredos nas variáveis de ambiente.
+# O núcleo fica em integracoes/ (independente do provedor); netlify/functions/ só adapta.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
