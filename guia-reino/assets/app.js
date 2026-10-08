@@ -51,12 +51,24 @@
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
   // Rascunho do editor (assets/editor.js), salvo só no navegador do mestre; vale apenas no modo mestre.
   // Se o arquivo publicado já é igual ao rascunho, o rascunho é descartado.
-  var campaignFile = clone(KM.campaign || {}), campaignDraft = false;
-  if (GM && !CHECK) {
-    var draft = store('km-campaign-draft');
-    if (draft && JSON.stringify(draft) === JSON.stringify(campaignFile)) { try { localStorage.removeItem('km-campaign-draft'); } catch (e) { /* ignore */ } }
-    else if (draft) { KM.campaign = draft; campaignDraft = true; }
+  function loadDraft(key, file) {
+    if (!GM || CHECK) return null;
+    var draft = store(key);
+    if (draft && JSON.stringify(draft) === JSON.stringify(file)) { try { localStorage.removeItem(key); } catch (e) { /* ignore */ } return null; }
+    return draft || null;
   }
+  var campaignFile = clone(KM.campaign || {}), campaignDraft = false;
+  var draft = loadDraft('km-campaign-draft', campaignFile);
+  if (draft) { KM.campaign = draft; campaignDraft = true; }
+  // Ficha do reino (data/reino.js; aba "Reino" em assets/ficha.js), com rascunho do mestre como a campanha
+  var reinoFile = clone(KM.reino || {}), reinoDraft = false;
+  var rdraft = loadDraft('km-reino-draft', reinoFile);
+  if (rdraft) { KM.reino = rdraft; reinoDraft = true; }
+  if (!KM.reino || typeof KM.reino !== 'object') KM.reino = {};
+  var sheet = KM.reino; // mesmo objeto editado pela ficha (perícias → disponibilidade das atividades)
+  // Site (data/site.js). Vitrine: no endereço showcaseHost (ou com ?vitrine) o Publicar fica desativado
+  var site = KM.site || {};
+  var SHOWCASE = /[?&]vitrine\b/.test(location.search) || (!!site.showcaseHost && location.hostname === site.showcaseHost);
   var campaignSrc = clone(KM.campaign || {});
   var campaignUnknown = [], campaignInactive = [];
   if (KM.campaign) Object.keys(KM.campaign).forEach(function (key) {
@@ -184,16 +196,24 @@
     var s = arr(KM.skills);
     return s.length ? s.map(function (x) { return x.name; }) : DEFAULT_SKILLS;
   }
-  var kingdom = store('km-kingdom') || null; // { skills: {agriculture: 1, ...}, hideUnavailable: bool }
+  // Proficiências vêm da ficha do reino (KM.reino.skills: id → 0..4). Sem nenhuma treinada, a ficha
+  // conta como não preenchida e tudo aparece disponível. Ocultar indisponíveis é preferência do navegador.
+  var hideUnavailable = !!store('km-hide-unavailable');
+  try { localStorage.removeItem('km-kingdom'); } catch (e) { /* configuração antiga, substituída pela ficha */ }
+  function ranks() {
+    var sk = sheet.skills || {};
+    return Object.keys(sk).some(function (k) { return sk[k] > 0; }) ? sk : null;
+  }
 
   function available(act) {
-    if (!kingdom || !kingdom.skills) return true;
+    var rk = ranks();
+    if (!rk) return true;
     var sk = arr(act.skills);
     if (!sk.length) return true;
     return sk.some(function (s) {
       var id = kebab(s.skill);
-      if (!(id in kingdom.skills)) return true; // "Any skill", "Varies", etc.
-      return kingdom.skills[id] >= rankIdx(s.proficiency);
+      if (!(id in rk)) return true; // "Any skill", "Varies", etc.
+      return rk[id] >= rankIdx(s.proficiency);
     });
   }
 
@@ -293,10 +313,10 @@
   function skillChips(a) {
     return arr(a.skills).map(function (s) {
       var r = rankIdx(s.proficiency);
-      var ok = true;
-      if (kingdom && kingdom.skills) {
+      var ok = true, rk = ranks();
+      if (rk) {
         var id = kebab(s.skill);
-        if (id in kingdom.skills) ok = kingdom.skills[id] >= r;
+        if (id in rk) ok = rk[id] >= r;
       }
       return '<span class="chip skill' + (ok ? '' : ' warn') + '" title="' + esc((SKILL_PT[kebab(s.skill)] || s.skill) + ' — mínimo: ' + RANK_PT[r] + (s.note ? ' · ' + s.note : '')) + '">' +
         esc(String(s.skill).charAt(0).toUpperCase() + String(s.skill).slice(1)) + (r ? ' <span class="rank">' + RANK_ABBR[r] + '</span>' : '') + '</span>';
@@ -344,7 +364,7 @@
     opts = opts || {};
     var cls = 'card';
     if (e._kind === 'activity' && !available(e)) {
-      if (kingdom && kingdom.hideUnavailable && !opts.showAll) return '';
+      if (hideUnavailable && !opts.showAll) return '';
       cls += ' unavailable';
     }
     var meta = srcChip(e);
@@ -443,7 +463,7 @@
     }
     arr(e.tags).forEach(function (t) { chips += '<span class="chip">' + esc(t) + '</span>'; });
     if (e._kind === 'activity' && arr(e.skills).length) chips += skillChips(e);
-    if (e._kind === 'activity' && kingdom && kingdom.skills) chips += available(e) ? '<span class="chip ok">Disponível p/ o reino</span>' : '<span class="chip warn">Reino sem a perícia necessária</span>';
+    if (e._kind === 'activity' && ranks()) chips += available(e) ? '<span class="chip ok">Disponível p/ o reino</span>' : '<span class="chip warn">Reino sem a perícia necessária</span>';
     if (chips) h.push('<div class="chips">' + chips + '</div>');
     if (GM && e.source === 'campanha') h.push('<div class="callout gm"><b>' + (e._inactive ? 'Inativo — oculto para os jogadores.' : 'Ativo.') + '</b>' + (e.condition ? ' Condição: ' + esc(e.condition) : '') +
       ' <button type="button" class="btn btn-sm" data-ed-edit="' + esc(e._ckey + '|' + e.id) + '">✎ Editar</button></div>');
@@ -679,7 +699,7 @@
   // ---- Atividades
   var actState = store('km-act') || { q: '', step: 'all', skill: '', prof: '' };
   function viewAtividades() {
-    var h = '<div class="page-head"><div><h1>Atividades do Reino</h1><p>Todas as atividades do reino e de exército. Filtre por etapa, perícia ou proficiência. Configure as perícias do reino em <b>⚙ Meu Reino</b> para marcar o que vocês já podem fazer.</p></div></div>';
+    var h = '<div class="page-head"><div><h1>Atividades do Reino</h1><p>Todas as atividades do reino e de exército. Filtre por etapa, perícia ou proficiência. As proficiências da <a href="#/reino">ficha do reino</a> marcam com 🔒 o que o reino ainda não pode fazer.</p></div></div>';
     h += '<div class="filters" id="act-filters">' +
       '<input type="search" id="act-q" placeholder="Filtrar atividades…" value="' + esc(actState.q) + '">' +
       '<div class="seg" id="act-step">' + [['all', 'Todas']].concat(STEP_ORDER.map(function (s) { return [s, STEP_LABEL[s]]; })).map(function (s) {
@@ -691,6 +711,7 @@
       '<label>Exige <select id="act-prof"><option value="">qualquer</option><option value="0"' + (actState.prof === '0' ? ' selected' : '') + '>sem treino</option><option value="1"' + (actState.prof === '1' ? ' selected' : '') + '>treinado+</option></select></label>' +
       sourceSelect('act-src', actState.src) +
       '<label><input type="checkbox" id="act-quick"' + (actState.quick ? ' checked' : '') + '> resultados resumidos</label>' +
+      (ranks() ? '<label title="Atividades que exigem proficiência que o reino não tem"><input type="checkbox" id="act-hide"' + (hideUnavailable ? ' checked' : '') + '> ocultar indisponíveis</label>' : '') +
       '<span class="count" id="act-count"></span></div><div id="act-list"></div>';
     return h;
   }
@@ -706,7 +727,7 @@
         var min = Math.min.apply(null, arr(e.skills).map(function (s) { return rankIdx(s.proficiency); }).concat([9]));
         return actState.prof === '0' ? min === 0 : min >= 1;
       });
-      var visible = list.filter(function (e) { return !(kingdom && kingdom.hideUnavailable && !available(e)); });
+      var visible = list.filter(function (e) { return !(hideUnavailable && !available(e)); });
       $('#act-count').textContent = visible.length + ' de ' + all.filter(function (e) { return e._kind === 'activity'; }).length;
       var opts = { quick: actState.quick, showStep: actState.step === 'all' };
       var out = '';
@@ -729,6 +750,7 @@
     $('#act-prof').addEventListener('change', upd);
     $('#act-src').addEventListener('change', upd);
     $('#act-quick').addEventListener('change', upd);
+    if ($('#act-hide')) $('#act-hide').addEventListener('change', function () { hideUnavailable = this.checked; store('km-hide-unavailable', hideUnavailable); upd(); });
     $('#act-step').addEventListener('click', function (ev) {
       var b = ev.target.closest('button'); if (!b) return;
       actState.step = b.dataset.v;
@@ -958,45 +980,12 @@
   }
 
   /* =========================================================
-   * Configuração "Meu Reino"
-   * ========================================================= */
-  function openKingdomConfig() {
-    var k = kingdom || { skills: {}, hideUnavailable: false };
-    $('#modal-kind').textContent = 'Configuração';
-    $('#modal-title').textContent = 'Meu Reino';
-    $('#modal-sub').textContent = 'Salvo apenas neste navegador';
-    $('#modal-back').hidden = true;
-    var h = '<p>Informe a proficiência do reino em cada perícia. As atividades que exigem um grau maior aparecem esmaecidas com 🔒 (ou ocultas, se você marcar a opção abaixo).</p>' +
-      '<div class="skill-config">' + skillList().map(function (s) {
-        var id = kebab(s), v = k.skills[id] || 0;
-        return '<label><span>' + esc(s) + ' <span class="muted" style="font-size:12px">' + esc(SKILL_PT[id] || '') + '</span></span><select data-skill="' + id + '">' +
-          RANK_PT.map(function (r, i) { return '<option value="' + i + '"' + (v === i ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></label>';
-      }).join('') + '</div>' +
-      '<p><label><input type="checkbox" id="kc-hide"' + (k.hideUnavailable ? ' checked' : '') + '> Ocultar atividades indisponíveis</label></p>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" id="kc-save">Salvar</button><button class="btn" id="kc-clear">Limpar configuração</button></div>';
-    $('#modal-body').innerHTML = h;
-    modal.hidden = false;
-    document.body.style.overflow = 'hidden';
-    $('#kc-save').onclick = function () {
-      var skills = {};
-      $$('#modal-body select[data-skill]').forEach(function (s) { skills[s.dataset.skill] = +s.value; });
-      kingdom = { skills: skills, hideUnavailable: $('#kc-hide').checked };
-      store('km-kingdom', kingdom);
-      closeModal(); route();
-    };
-    $('#kc-clear').onclick = function () {
-      kingdom = null;
-      try { localStorage.removeItem('km-kingdom'); } catch (e) { /* ignore */ }
-      closeModal(); route();
-    };
-  }
-
-  /* =========================================================
    * Roteamento e eventos globais
    * ========================================================= */
   var ROUTES = {
     turno: [viewTurno], atividades: [viewAtividades, bindAtividades], estruturas: [viewEstruturas, bindEstruturas],
-    guerra: [viewGuerra, bindGuerra], talentos: [viewTalentos, bindTalentos], regras: [viewRegras, bindRegras], criacao: [viewCriacao]
+    guerra: [viewGuerra, bindGuerra], talentos: [viewTalentos, bindTalentos], regras: [viewRegras, bindRegras], criacao: [viewCriacao],
+    reino: [function () { return window.KMFicha ? window.KMFicha.view() : '<div class="empty">Ficha do reino não carregada.</div>'; }]
   };
   function route() {
     var m = location.hash.match(/^#\/([a-z]+)(?:\/([a-z-]+):([a-z0-9-]+))?/);
@@ -1044,7 +1033,16 @@
     if (ev.key === 'Backspace' && !modal.hidden && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && modalStack.length > 1) { ev.preventDefault(); modalBack(); return; }
     if (ev.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { ev.preventDefault(); sInput.focus(); sInput.select(); }
   });
-  $('#btn-kingdom').addEventListener('click', openKingdomConfig);
+  // Vitrine: botão "Crie o seu" leva ao fork do repositório base
+  if (SHOWCASE && site.upstream) {
+    var create = document.createElement('a');
+    create.className = 'btn btn-primary btn-create';
+    create.href = 'https://github.com/' + site.upstream + '/fork';
+    create.target = '_blank'; create.rel = 'noopener noreferrer';
+    create.title = 'Faça um fork no GitHub e tenha o site da sua mesa (instruções no README)';
+    create.textContent = 'Crie o seu ↗';
+    $('.topbar-actions').insertBefore(create, $('.topbar-actions').firstChild);
+  }
 
   // Tema
   var theme = store('km-theme');
@@ -1076,7 +1074,8 @@
     var pre = document.createElement('pre');
     pre.id = 'selfcheck';
     var campaign = all.filter(function (e) { return e.source === 'campanha'; }).map(function (e) { return e._kind + ':' + e.id; });
-    pre.textContent = JSON.stringify({ counts: counts, campaign: campaign, campaignInactive: campaignInactive, missingRefs: missing, noSummary: noSummary, noText: noText, stepsWithoutActivities: stepsNoAct, activitiesWithUnknownStep: orphanActs, duplicateIds: dupIds, campaignUnknownKeys: campaignUnknown }, null, 1);
+    var reinoRefs = window.KMFicha ? window.KMFicha.check() : ['assets/ficha.js não carregou'];
+    pre.textContent = JSON.stringify({ counts: counts, campaign: campaign, campaignInactive: campaignInactive, site: { repo: site.repo || '', showcase: SHOWCASE }, kingdom: sheet.name || '', missingRefs: missing, noSummary: noSummary, noText: noText, stepsWithoutActivities: stepsNoAct, activitiesWithUnknownStep: orphanActs, duplicateIds: dupIds, campaignUnknownKeys: campaignUnknown, kingdomBadRefs: reinoRefs }, null, 1);
     document.body.appendChild(pre);
   }
 
@@ -1094,8 +1093,9 @@
 
   // Exposto para depuração no console e para o editor do mestre (assets/editor.js)
   window.KMApp = {
-    registry: registry, all: all, resolve: resolve, search: search, check: selfCheck,
-    gm: GM, campaign: { file: campaignFile, current: campaignSrc, draft: campaignDraft },
+    registry: registry, all: all, resolve: resolve, search: search, check: selfCheck, route: route,
+    gm: GM, showcase: SHOWCASE, site: site, campaign: { file: campaignFile, current: campaignSrc, draft: campaignDraft },
+    reino: { file: reinoFile, current: sheet, draft: reinoDraft },
     util: {
       esc: esc, kebab: kebab, store: store, clone: clone, skillList: skillList, rich: rich, showPanel: showPanel, closeModal: closeModal,
       SKILL_PT: SKILL_PT, RANKS: RANKS, RANK_PT: RANK_PT, STEP_ORDER: STEP_ORDER, STEP_LABEL: STEP_LABEL
@@ -1108,11 +1108,15 @@
     gmBar.innerHTML = '<b>Modo mestre</b> — itens de campanha inativos visíveis (selo <span class="chip inactive">Inativo</span>), ' + campaignInactive.length + ' inativo(s). ' +
       '<button type="button" class="btn btn-sm" data-ed-panel>☰ Gerenciar campanha</button> <button type="button" class="btn btn-sm" data-ed-new="activities">+ Atividade</button> <button type="button" class="btn btn-sm" data-ed-new="structures">+ Estrutura</button> ' +
       (campaignDraft ? '<span class="gm-draft">⚠ Rascunho local não publicado. <button type="button" class="btn btn-sm btn-primary" data-ed-publish>☁ Publicar</button> <button type="button" class="btn btn-sm" data-ed-download>⤓ Baixar</button> <button type="button" class="btn btn-sm" data-ed-discard>Descartar rascunho</button></span> ' : '') +
+      (reinoDraft ? '<span class="gm-draft">⚠ Ficha do reino com rascunho não publicado: <a href="#/reino">abrir a ficha</a>.</span> ' : '') +
+      (SHOWCASE ? '<span class="muted">Vitrine: publicação desativada.</span> ' : '') +
       '<a href="' + esc(location.pathname) + '" data-gm-exit>Sair do modo mestre</a>';
     document.body.insertBefore(gmBar, view);
     gmBar.querySelector('[data-gm-exit]').addEventListener('click', function (ev) { ev.preventDefault(); location.href = location.pathname + location.hash; });
   }
 
-  route();
-  if (CHECK) selfCheck();
+  // A primeira tela espera os demais scripts (ficha.js registra a aba Reino)
+  function start() { route(); if (CHECK) selfCheck(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();

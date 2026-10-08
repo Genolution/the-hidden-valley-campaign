@@ -1,7 +1,7 @@
 <#
   Verificação do Guia do Reino (sem Node/Python; usa JScript do Windows + Edge headless).
 
-  1. Checa a sintaxe de assets/app.js e data/*.js.
+  1. Checa a sintaxe de assets/*.js e data/*.js.
   2. Abre index.html?check no Edge headless e lê o relatório do selfCheck()
      (referências [[tipo:id]] quebradas, summary/text faltando, etapas sem atividade).
   3. Opcional: -Screenshot "#/estruturas" salva um PNG da rota (para conferência visual).
@@ -26,7 +26,7 @@ New-Item -ItemType Directory -Force $tmp | Out-Null
 $fail = $false
 
 # 1. Sintaxe
-$files = @((Join-Path $app 'assets\app.js'), (Join-Path $app 'assets\editor.js')) + @(Get-ChildItem (Join-Path $app 'data') -Filter *.js | ForEach-Object FullName)
+$files = @(Get-ChildItem (Join-Path $app 'assets') -Filter *.js | ForEach-Object FullName) + @(Get-ChildItem (Join-Path $app 'data') -Filter *.js | ForEach-Object FullName)
 & cscript //nologo (Join-Path $PSScriptRoot 'jscheck.js') @files
 if ($LASTEXITCODE -ne 0) { $fail = $true }
 
@@ -52,7 +52,8 @@ if (-not $m.Success) {
   Write-Host "Entidades: $counts"
   Write-Host "Campanha ($(@($rep.campaign).Count)): $(@($rep.campaign) -join ', ')"
   Write-Host "  inativos/ocultos ($(@($rep.campaignInactive).Count)): $(@($rep.campaignInactive) -join ', ')"
-  foreach ($k in 'missingRefs', 'noSummary', 'noText', 'stepsWithoutActivities', 'activitiesWithUnknownStep', 'duplicateIds', 'campaignUnknownKeys') {
+  Write-Host "Site: repo='$($rep.site.repo)' vitrine=$($rep.site.showcase); Reino: '$($rep.kingdom)'"
+  foreach ($k in 'missingRefs', 'noSummary', 'noText', 'stepsWithoutActivities', 'activitiesWithUnknownStep', 'duplicateIds', 'campaignUnknownKeys', 'kingdomBadRefs') {
     $v = $rep.$k
     $n = if ($v -is [array]) { $v.Count } else { @($v.PSObject.Properties).Count }
     if ($n) { $fail = $true; Write-Host "PROBLEMA $k ($n):" -ForegroundColor Yellow; $v | ConvertTo-Json -Depth 5 | Write-Host }

@@ -1,17 +1,5 @@
 # Site estático: sem build; publica só a pasta do app.
+# Os cabeçalhos de segurança (CSP etc.) ficam em guia-reino/_headers (vale também no Cloudflare Pages).
 [build]
   publish = "guia-reino"
   command = ""
-
-# Cabeçalhos de segurança para todas as páginas.
-# CSP: scripts só do próprio site; estilos inline são necessários (o app gera atributos style="…");
-# fontes do Google Fonts; connect-src libera a API do GitHub (botão "Publicar" do editor).
-# Ao adicionar uma origem externa nova (script, fonte, API), ela precisa entrar aqui.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"

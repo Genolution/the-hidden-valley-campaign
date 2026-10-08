@@ -69,9 +69,44 @@ KM.campaign = {
 - **Ativação:** só itens com `"active": true` entram no site. Os demais ficam cadastrados mas ocultos (nem busca, nem links: um `[[...]]` apontando para eles aparece como texto cinza). `condition` é uma anotação livre do que ativa o item.
 - **Modo mestre:** `index.html?mestre` (ex.: `?mestre#/estruturas`) carrega também os inativos, com selo "Inativo", a condição no topo do modal, banner no alto da página e a opção "campanha inativa" no filtro Origem. O `?check` também carrega tudo, para validar os inativos.
 - Oculto ≠ secreto: o `campanha.js` publicado é legível por quem abrir o arquivo.
-- **Editor no navegador** (modo mestre → "☰ Gerenciar campanha", "+ Atividade", "+ Estrutura", ou "✎ Editar" no modal de um item): formulários para atividades e estruturas, modo JSON para qualquer coleção, ativar/desativar e excluir. Gera automaticamente `stats` (se vazio), `costText`, `construction.text`, `tags` e — em estruturas novas sem texto — o `text` no formato do livro. As mudanças ficam num rascunho local (`localStorage['km-campaign-draft']`) até serem publicadas: **☁ Publicar** (grava via API do GitHub; token em `localStorage['km-gh-token']`) ou baixar o `campanha.js` e enviá-lo manualmente.
+- **Editor no navegador** (modo mestre → "☰ Gerenciar campanha", "+ Atividade", "+ Estrutura", ou "✎ Editar" no modal de um item): formulários para atividades e estruturas, modo JSON para qualquer coleção, ativar/desativar e excluir. Gera automaticamente `stats` (se vazio), `costText`, `construction.text`, `tags` e — em estruturas novas sem texto — o `text` no formato do livro. As mudanças ficam num rascunho local (`localStorage['km-campaign-draft']`) até serem publicadas: **☁ Publicar** (grava via API do GitHub com `assets/github.js`; token em `localStorage['km-gh-token']`, repositório em `data/site.js`) ou baixar o `campanha.js` e enviá-lo manualmente.
 - O `id` não pode repetir um id do livro (o `?check` acusa em `duplicateIds`).
 - Melhorias entre campanha e livro: declare só no item da campanha (`upgradeFrom: ["houses"]` ou `upgradeTo: [...]`). O `app.js` completa o lado oposto ao carregar, então a estrutura do livro passa a mostrar o vínculo sem editar `structures.js`.
+
+## Ficha do reino (`data/reino.js`)
+
+`KM.reino` guarda só valores-base; `assets/ficha.js` completa campos ausentes (`normalize()`) e calcula o resto.
+Vem vazia no repositório base (nível 1, atributos 10, o resto 0/vazio).
+
+| Campo | Conteúdo |
+|---|---|
+| `name`, `capital`, `languages`, `notes` | texto (`notes` aceita o mini-markdown) |
+| `charter`, `heartland`, `government` | id de `KM.creation.*` (vira link) |
+| `level`, `xp`, `size` (hexes), `unrest`, `rp` | números |
+| `fameType` / `fame` | `"fame"` ou `"infamy"` / pontos (0–3) |
+| `abilities` | `{culture, economy, loyalty, stability}` → valor do atributo (modificador = ⌊(valor−10)/2⌋) |
+| `ruin` | `{corruption, crime, decay, strife}` → `{value, threshold, penalty}`; `penalty` = penalidade de item no atributo ligado (Culture, Economy, Stability, Loyalty) |
+| `resourceDice` | `{bonus, penalty}` → dados extras/a menos (total = nível + 4 + bônus − penalidade; dado pelo tamanho) |
+| `commodities` | `{food, lumber, luxuries, ore, stone}` → `{stock, extra}`; limite = estoque do tamanho + `extra` (estruturas) |
+| `consumption` | `{armies, modifier}`; total = soma do consumo dos assentamentos + `armies` + `modifier` |
+| `leaders` | id de `KM.leaders` → `{name, pc, invested}`; `name` vazio = cargo vago |
+| `skills` | id de `KM.skills` → grau 0–4 (destreinado … lendário); também decide a disponibilidade das atividades |
+| `modifiers` | `[{type: "status"\|"item"\|"circumstance"\|"untyped", value, scope: "all"\|"ability:<id>"\|"skill:<id>", note}]` |
+| `feats` | ids de `KM.feats` |
+| `settlements` | `[{name, type: "village"\|"town"\|"city"\|"metropolis", consumption, notes}]` |
+
+**Total de uma perícia** (`skillTotal()`): modificador do atributo + proficiência (nível + 2×grau, se treinada) + bônus e
+penalidades. Bônus de status de cargo investido (+1; +2 no nível 8; +3 no 16) para o atributo-chave do cargo; Unrest
+(−1/−2/−3/−4 de status com 1/5/10/15+); ruína (item); vacância sem tipo (Ruler −1 em tudo; Counselor/Emissary/Treasurer/Viceroy
+−1 no atributo da regra — veja `VACANCY`); `modifiers`. **Mesmo tipo não soma**: vale o maior bônus e a pior penalidade de
+status, item e circunstância; "sem tipo" soma tudo. **CD de Controle** = tabela por nível + mod. de tamanho + 2 se o Ruler
+estiver vago. Bônus de item de estruturas não entram (são por atividade e dependem das construções de cada assentamento).
+
+## Configuração do site (`data/site.js`)
+
+`KM.site = {repo, branch, root, deploysUrl, upstream, showcaseHost}` — repositório e branch onde o modo mestre publica
+(`repo` vazio = Publicar abre o assistente que grava este arquivo), pasta do site no repositório, link opcional dos deploys,
+repositório base (botão "Crie o seu") e endereço da vitrine (lá, ou com `?vitrine`, a publicação fica desativada).
 
 ## Ao adicionar/alterar dados
 

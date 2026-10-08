@@ -3,6 +3,20 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-08 — ficha do reino, repositório base/vitrine, site.js e Nova campanha
+
+- **Decisão (usuário):** este repositório vira a **base** do projeto (conteúdo vazio). A campanha do usuário irá para um fork/repositório próprio com site próprio, criado por ele depois. O site atual do Netlify vira **vitrine** (sem publicar, com botão "Crie o seu" → fork).
+- `campanha.js` esvaziado (`KM.campaign = {}`). O conteúdo anterior (Silken Diplomacy, Expedition Pavilion etc.) está no commit `34d73d3` — recupere de lá no repositório da campanha. Itens do backlog específicos da campanha foram removidos daqui pelo mesmo motivo.
+- **Aba Reino** (`assets/ficha.js`, dados em `data/reino.js`): substitui o modal "⚙ Meu Reino" (perícias por navegador, `km-kingdom`). Todos veem; só o modo mestre edita (inline, rascunho `km-reino-draft` salvo a cada mudança). Calcula modificadores, totais das perícias (atributo + proficiência + bônus de status de cargo investido, Unrest, ruína, vacância e ajustes do mestre, **sem somar bônus do mesmo tipo**; a coluna Composição mostra a conta e o que não somou), CD de Controle, Dados de Recurso, limites de estoque e consumo. Botão **🎲 Rolar** (todos) + "Aplicar ao RP" (mestre). Assentamentos só com nome/tipo/consumo/notas.
+- **Decisão (usuário):** bônus de item de estruturas ficam para depois — dependem de registrar as construções de cada assentamento (são por atividade, não por perícia).
+- "Ocultar atividades indisponíveis" virou checkbox na aba Atividades (`km-hide-unavailable`); a disponibilidade vem das perícias da ficha (ficha sem nenhuma treinada = tudo disponível).
+- **`assets/github.js`** (extraído do `editor.js`): `KMGitHub.publish()` para qualquer arquivo de `data/`, um commit por arquivo; assistente de configuração que grava `data/site.js` (repo/branch/pasta/deploys) quando `repo` está vazio; painel da vitrine. Repositório e link de deploys não estão mais fixos no código.
+- **Nova campanha** (painel ☰ Gerenciar campanha): publica `campanha.js` e `reino.js` vazios com dupla confirmação; na vitrine só zera os rascunhos locais.
+- CSP movido do `netlify.toml` para `guia-reino/_headers` (vale no Netlify e no Cloudflare Pages). README com a seção "Usar na sua campanha" (fork ou repo privado, Netlify/Cloudflare/GitHub Pages, assistente ou edição manual do `site.js`, token, proteção de branch).
+- `app.js`: primeira renderização no `DOMContentLoaded` (a aba Reino é registrada por `ficha.js`); `?vitrine` simula a vitrine; selfCheck ganhou `site`, `kingdom` e `kingdomBadRefs` (também conferido pelo `verificar.ps1`, que agora checa a sintaxe de todos os `assets/*.js`).
+- Testes headless (17 verificações): total de perícia com empilhamento (Trade = +8 no cenário de teste), CD de Controle 19 (nível 3, Province, Ruler vago), rascunho e recarga, rolagem 7d6 e aplicar ao RP, consumo de Town = 2, atividades bloqueadas pela ficha, Publicar sem repo → assistente, vitrine (botão Crie o seu, Publicar desativado, Nova campanha local), jogador sem campos editáveis. Não testado: publicação real no GitHub e o assistente gravando o `site.js` (precisam de token real).
+- Conferido com o usuário: Magister e General têm de fato a mesma penalidade de vacância (–4 em atividades de Guerra).
+
 ## 2026-10-08 — botão Publicar (GitHub API) + cabeçalhos de segurança
 
 - `netlify.toml`: CSP (scripts só do site, estilos inline permitidos, Google Fonts, `connect-src` com `api.github.com`), `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`. Testado com servidor local (HttpListener) aplicando os mesmos cabeçalhos; confirmado no ar.

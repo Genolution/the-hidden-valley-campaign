@@ -4,13 +4,14 @@ Referência rápida das regras de gerenciamento de reino do *Kingmaker Player's 
 Abra `index.html` direto no navegador (não precisa de servidor nem internet; só a fonte do título vem do Google Fonts).
 
 ## Abas
+- **Reino** — a ficha do reino, mantida pelo mestre (só leitura para os jogadores): atributos e ruína, situação (nível, XP, tamanho, CD de Controle, Unrest, Fama), recursos e commodities, líderes, perícias, bônus extras, talentos, assentamentos e notas. Os totais são calculados pelas regras; o detalhe de cada perícia aparece na coluna **Composição**. **🎲 Rolar** rola os Dados de Recurso do turno (qualquer pessoa pode rolar; só o mestre aplica o resultado ao RP).
 - **Turno do Reino** — as 4 fases e suas etapas, com as atividades de cada etapa (clique para abrir o modal).
 - **Atividades** — todas as atividades (reino + exército) com filtros por etapa, perícia e proficiência.
 - **Estruturas** — tabela ordenável (nível, lotes, custo, CD, "Melhora para") e filtro "Bônus em <perícia>". A coluna "Melhora para" lista as estruturas para as quais aquela pode ser melhorada (clique para abrir).
 - **Guerra**, **Talentos**, **Regras**, **Criação do Reino**.
 
 Atalhos: `/` foca a busca global · `Esc` fecha o modal · `Backspace` volta no modal.
-**⚙ Meu Reino**: informe a proficiência do reino em cada perícia para marcar/ocultar atividades indisponíveis (salvo no navegador).
+As proficiências da ficha do reino marcam com 🔒 as atividades que o reino ainda não pode fazer; na aba Atividades, **ocultar indisponíveis** as esconde (preferência salva no navegador). Com a ficha sem nenhuma perícia treinada, tudo aparece disponível.
 Links diretos: `index.html#/estruturas/structure:town-hall` abre a aba e o modal.
 
 ## Dados
@@ -25,6 +26,8 @@ Ficam em `data/*.js` (JS em vez de JSON para funcionar via `file://`):
 | `structures.js` | estruturas e regras de assentamento | 45–60 |
 | `warfare.js` | exércitos, táticas, ações de guerra, condições | 61–77 |
 | `campanha.js` | **conteúdo próprio da campanha** (estruturas, atividades… fora do livro) | — |
+| `reino.js` | **ficha do reino** (valores-base; o resto é calculado) | — |
+| `site.js` | configuração da publicação (repositório, branch) | — |
 
 Cada item tem `summary` (PT), `text` (texto original em inglês) e opcionalmente `quick`/`outcomes`.
 Referências cruzadas no texto usam `[[tipo:id|Rótulo]]`.
@@ -37,6 +40,12 @@ Ou, pelo terminal (da pasta acima): `powershell -NoProfile -ExecutionPolicy Bypa
 
 **Link do card:** no campo **Fonte / link do card** (`sourceRef`), cole o link do card (ex.: do pf2 template tools). No site aparece o botão **Ver card ↗**, que abre o card numa nova aba.
 
-**Editar pelo site (modo mestre):** na faixa do topo, use **☰ Gerenciar campanha** (lista, ativar/desativar, editar, excluir), **+ Atividade** ou **+ Estrutura**; no modal de um item da campanha há **✎ Editar**. As mudanças valem na hora para você, mas ficam salvas só no seu navegador (rascunho). Para os jogadores verem, clique em **☁ Publicar**: o `campanha.js` é gravado no GitHub e o Netlify atualiza o site em instantes; o aviso acompanha até o site estar no ar e então o rascunho é descartado sozinho. **Descartar rascunho** volta ao arquivo publicado.
+**Editar pelo site (modo mestre):** na faixa do topo, use **☰ Gerenciar campanha** (lista, ativar/desativar, editar, excluir), **+ Atividade** ou **+ Estrutura**; no modal de um item da campanha há **✎ Editar**. As mudanças valem na hora para você, mas ficam salvas só no seu navegador (rascunho). Para os jogadores verem, clique em **☁ Publicar**: o `campanha.js` é gravado no GitHub e o provedor (Netlify etc.) atualiza o site em instantes; o aviso acompanha até o site estar no ar e então o rascunho é descartado sozinho. **Descartar rascunho** volta ao arquivo publicado.
 
-Na primeira vez, o Publicar pede um **token do GitHub**, criado uma única vez, com acesso só a este repositório e permissão *Contents: Read and write*. O próprio site mostra o passo a passo; o token fica guardado só naquele navegador. Para trocar ou esquecer o token, use **⚙ Token** no painel. Sem token, dá para publicar à mão: use **⤓ Baixar** e envie o arquivo para `guia-reino/data/` no GitHub (*Add file → Upload files*).
+**Ficha do reino (modo mestre):** na aba **Reino**, os campos ficam editáveis e cada alteração é salva no rascunho na hora. Use **☁ Publicar ficha**, **⤓ Baixar reino.js** ou **Descartar rascunho** na faixa do topo da ficha. Cargos sem ocupante contam como vagos (com a penalidade de vacância); marque **Investido** nos cargos investidos do turno. Em **Bônus e penalidades extras**, informe tipo (status, item, circunstância, sem tipo), valor, alcance (todos os testes, um atributo ou uma perícia) e motivo.
+
+Na primeira vez, o Publicar abre o **assistente de configuração** (repositório, branch e token), que grava `data/site.js`; depois pede só o **token do GitHub**, criado uma única vez, com acesso só ao repositório do site e permissão *Contents: Read and write*. O próprio site mostra o passo a passo; o token fica guardado só naquele navegador. Para trocar o token ou o repositório, use **⚙ GitHub** no painel. Sem token, dá para publicar à mão: use **⤓ Baixar** e envie o arquivo para `guia-reino/data/` no GitHub (*Add file → Upload files*).
+
+**Nova campanha:** no fim do painel **☰ Gerenciar campanha**, publica `campanha.js` e `reino.js` vazios (pede confirmação duas vezes).
+
+**Vitrine:** no endereço da vitrine do projeto o modo mestre funciona só para experimentar (nada é publicado) e aparece o botão **Crie o seu**, que leva ao fork no GitHub. Para usar na sua mesa, veja o `README.md` do repositório.

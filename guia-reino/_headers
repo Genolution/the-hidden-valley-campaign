@@ -1,0 +1,10 @@
+# Cabeçalhos de segurança (formato _headers: Netlify e Cloudflare Pages).
+# CSP: scripts só do próprio site (sem inline/eval); estilos inline são necessários (o app gera
+# atributos style="…"); fontes do Google Fonts; connect-src libera a API do GitHub (botão
+# "Publicar" do modo mestre). Ao adicionar uma origem externa nova, ela precisa entrar aqui.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
