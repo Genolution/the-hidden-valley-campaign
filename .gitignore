@@ -6,3 +6,6 @@
 .claude/settings.local.json
 Thumbs.db
 desktop.ini
+
+# Segredos locais (os reais ficam nas variáveis de ambiente do provedor)
+.env

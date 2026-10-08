@@ -475,6 +475,7 @@
     }
     h.push(statsHtml(e.stats));
 
+    if (e._kind === 'activity' && !e._army && window.KMFicha) h.push(window.KMFicha.rollerHtml(e));
     if (e.quick && OUT_LABEL.some(function (o) { return e.quick[o[0]]; })) {
       h.push('<div class="outcomes-quick">' + OUT_LABEL.filter(function (o) { return e.quick[o[0]]; }).map(function (o) {
         return '<div class="oq ' + o[2] + '"><b>' + o[3] + '</b>' + esc(e.quick[o[0]]) + '</div>';
@@ -985,7 +986,8 @@
   var ROUTES = {
     turno: [viewTurno], atividades: [viewAtividades, bindAtividades], estruturas: [viewEstruturas, bindEstruturas],
     guerra: [viewGuerra, bindGuerra], talentos: [viewTalentos, bindTalentos], regras: [viewRegras, bindRegras], criacao: [viewCriacao],
-    reino: [function () { return window.KMFicha ? window.KMFicha.view() : '<div class="empty">Ficha do reino não carregada.</div>'; }]
+    reino: [function () { return window.KMFicha ? window.KMFicha.view() : '<div class="empty">Ficha do reino não carregada.</div>'; }],
+    config: [function () { return window.KMIntegracoes ? window.KMIntegracoes.view() : ''; }, function () { if (window.KMIntegracoes) window.KMIntegracoes.bind(); }]
   };
   function route() {
     var m = location.hash.match(/^#\/([a-z]+)(?:\/([a-z-]+):([a-z0-9-]+))?/);
@@ -1033,6 +1035,8 @@
     if (ev.key === 'Backspace' && !modal.hidden && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && modalStack.length > 1) { ev.preventDefault(); modalBack(); return; }
     if (ev.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { ev.preventDefault(); sInput.focus(); sInput.select(); }
   });
+  if (KM.version) $('.footer').insertAdjacentHTML('beforeend', ' <span class="muted">· v' + esc(KM.version) + '</span>');
+
   // Vitrine: botão "Crie o seu" leva ao fork do repositório base
   if (SHOWCASE && site.upstream) {
     var create = document.createElement('a');
@@ -1112,6 +1116,7 @@
       (SHOWCASE ? '<span class="muted">Vitrine: publicação desativada.</span> ' : '') +
       '<a href="' + esc(location.pathname) + '" data-gm-exit>Sair do modo mestre</a>';
     document.body.insertBefore(gmBar, view);
+    $('#tabs').insertAdjacentHTML('beforeend', '<a href="#/config" data-tab="config" title="Versão, publicação e integrações (modo mestre)">⚙ Configurações</a>');
     gmBar.querySelector('[data-gm-exit]').addEventListener('click', function (ev) { ev.preventDefault(); location.href = location.pathname + location.hash; });
   }
 

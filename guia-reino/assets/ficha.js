@@ -278,7 +278,7 @@
         return '<tr><td><a class="xref" data-open="skill:' + attr(k.id) + '">' + esc(k.name) + '</a> <span class="muted">' + esc(U.SKILL_PT[k.id] || k.namePt || '') + '</span></td>' +
           '<td>' + esc(k.ability || '') + '</td>' +
           '<td>' + fSel('skills.' + k.id, U.RANK_PT.map(function (r, i) { return [String(i), r]; }), String(t.rank), t.rank ? '<span class="chip ok">' + U.RANK_PT[t.rank] + '</span>' : '<span class="muted">' + U.RANK_PT[0] + '</span>') + '</td>' +
-          '<td class="num"><b class="sh-total">' + signed(t.total) + '</b></td>' +
+          '<td class="num"><b class="sh-total">' + signed(t.total) + '</b> <button type="button" class="btn btn-sm btn-ghost sh-roll-btn" data-fi-rollskill="' + attr(k.id) + '" title="Rolar d20 + ' + signed(t.total) + '">🎲</button></td>' +
           '<td class="sh-small">' + esc(t.parts.map(partText).join(' ')) + (t.ignored.length ? '<span class="muted" title="Bônus/penalidades do mesmo tipo não se somam"> · não somam: ' + esc(t.ignored.map(partText).join(', ')) + '</span>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>' +
       '<p class="muted sh-small">Teste: d20 + total contra a CD de Controle (' + cdc.total + ') ou a CD da atividade. Bônus de item das estruturas valem por atividade e aparecem na própria atividade.</p>';
@@ -419,6 +419,111 @@
     rerender();
   });
 
+  /* ---------- rolagem de testes (aba Reino e modal das atividades; todos podem rolar) ---------- */
+  var PLAYER_KEY = 'km-player', SEND_KEY = 'km-chat-send';
+  var DEG = [['criticalSuccess', 'Sucesso crítico', 'cs'], ['success', 'Sucesso', 's'], ['failure', 'Falha', 'f'], ['criticalFailure', 'Falha crítica', 'cf']];
+
+  function rankOf(p) { var i = U.RANKS.indexOf(String(p || '').toLowerCase()); return i < 0 ? 0 : i; }
+  function skillById(id) { return skills().filter(function (k) { return k.id === id; })[0]; }
+  // Perícias que a atividade aceita ("Any"/"Varies" = todas), com o grau mínimo exigido
+  function activitySkills(act) {
+    var list = [], any = false;
+    (act.skills || []).forEach(function (x) {
+      var k = skillById(U.kebab(x.skill));
+      if (!k) { any = true; return; }
+      if (!list.some(function (l) { return l.k.id === k.id; })) list.push({ k: k, min: rankOf(x.proficiency) });
+    });
+    if (any) skills().forEach(function (k) { if (!list.some(function (l) { return l.k.id === k.id; })) list.push({ k: k, min: 0 }); });
+    return list;
+  }
+  function d20() {
+    if (window.crypto && window.crypto.getRandomValues) { var b = new Uint32Array(1); window.crypto.getRandomValues(b); return 1 + (b[0] % 20); }
+    return 1 + Math.floor(Math.random() * 20);
+  }
+  // Grau de sucesso: ±10 da CD = crítico; 20 natural melhora e 1 natural piora um grau
+  function degreeOf(total, dc, die) {
+    var i = total >= dc + 10 ? 0 : total >= dc ? 1 : total <= dc - 10 ? 3 : 2;
+    if (die === 20) i = Math.max(0, i - 1);
+    if (die === 1) i = Math.min(3, i + 1);
+    return i;
+  }
+  function plain(t) { return String(t || '').replace(/\[\[[^\]|]+\|([^\]]+)\]\]/g, '$1').replace(/\[\[[a-z-]+:([^\]]+)\]\]/g, '$1').replace(/\*+/g, '').replace(/\s+/g, ' ').trim(); }
+  function outcomeText(act, key) {
+    if (!act) return '';
+    var t = (act.quick && act.quick[key]) || (act.outcomes && act.outcomes[key]) || '';
+    t = plain(t);
+    return t.length > 300 ? t.slice(0, 297) + '…' : t;
+  }
+
+  function rollerHtml(act, skillId) {
+    var opts = act ? activitySkills(act) : skills().map(function (k) { return { k: k, min: 0 }; });
+    if (!opts.length) return '';
+    if (!skillId) { // padrão: a perícia de maior total
+      var best = null;
+      opts.forEach(function (o) { var t = skillTotal(o.k).total; if (!best || t > best.t) best = { id: o.k.id, t: t }; });
+      skillId = best.id;
+    }
+    var C = window.KMChat, chat = C && C.provider(), send = U.store(SEND_KEY) !== false;
+    var dc = controlDC().total;
+    return '<div class="roller" data-roller="' + attr(act ? act.id : '') + '">' +
+      (act ? '<div class="block-title">🎲 Rolar teste do reino</div>' : '') +
+      '<div class="roller-form">' +
+      '<label>Perícia <select class="fi" data-r="skill">' + opts.map(function (o) {
+        var lock = o.min > (s.skills[o.k.id] || 0);
+        return '<option value="' + attr(o.k.id) + '"' + (o.k.id === skillId ? ' selected' : '') + '>' + esc(o.k.name + ' ' + signed(skillTotal(o.k).total) + (lock ? ' 🔒 exige ' + U.RANK_PT[o.min].toLowerCase() : '')) + '</option>';
+      }).join('') + '</select></label>' +
+      '<label>CD <input type="number" class="fi fi-num" data-r="dc" value="' + dc + '" min="0" max="99" title="CD de Controle = ' + dc + '; ajuste se a atividade pedir outra"></label>' +
+      '<label>Seu nome <input type="text" class="fi" data-r="player" maxlength="40" value="' + attr(U.store(PLAYER_KEY) || '') + '" placeholder="quem rola"></label>' +
+      (chat && C.enabled() ? '<label class="fi-chk"><input type="checkbox" data-r="send"' + (send ? ' checked' : '') + '> enviar ao ' + esc(chat.name) + '</label>' : '') +
+      '<button type="button" class="btn btn-primary btn-sm" data-r-roll>🎲 Rolar d20</button></div>' +
+      '<div data-r-out></div>' +
+      (chat && !C.enabled() ? '<p class="muted sh-small">Chat: ' + esc(C.why()) + '.</p>' : '') +
+      '</div>';
+  }
+
+  function doRoll(box, fame) {
+    var k = skillById(box.querySelector('[data-r="skill"]').value);
+    if (!k) return;
+    var dcEl = box.querySelector('[data-r="dc"]'), dc = Math.max(0, Math.min(99, Math.round(num(dcEl.value, controlDC().total))));
+    var player = String(box.querySelector('[data-r="player"]').value || '').trim().slice(0, 40);
+    var sendEl = box.querySelector('[data-r="send"]'), send = !!(sendEl && sendEl.checked);
+    U.store(PLAYER_KEY, player);
+    if (sendEl) U.store(SEND_KEY, send);
+    var act = box.getAttribute('data-roller') ? A.resolve('activity', box.getAttribute('data-roller')) : null;
+    var t = skillTotal(k), die = d20(), total = die + t.total, di = degreeOf(total, dc, die), deg = DEG[di];
+    var natural = (die === 20 || die === 1) && degreeOf(total, dc, 10) !== di ? ' <span class="muted">(' + die + ' natural ' + (die === 20 ? 'melhora' : 'piora') + ' um grau)</span>' : '';
+    var outcome = outcomeText(act, deg[0]);
+    var h = '<div class="roll-res ' + deg[2] + '">' +
+      '<div class="roll-line"><b class="roll-total">' + total + '</b> <span>🎲 <b>' + die + '</b> ' + signed(t.total) + ' vs CD ' + dc + '</span> → <b class="roll-deg">' + deg[1] + '</b>' + natural + (fame ? ' <span class="chip">rerrolagem com Fama</span>' : '') + '</div>' +
+      (outcome ? '<div class="roll-outcome">' + esc(outcome) + '</div>' : '') +
+      '<div class="muted sh-small">' + esc(k.name) + ': ' + esc(t.parts.map(partText).join(' ')) + '</div>' +
+      '<div class="roll-actions">' + (!fame ? '<button type="button" class="btn btn-sm" data-r-fame title="Gasta 1 ponto de Fama/Infâmia (o mestre desconta na ficha)">↻ Rerrolar com Fama</button>' : '') +
+      '<span class="muted sh-small" data-r-chat></span></div></div>';
+    box.querySelector('[data-r-out]').innerHTML = h;
+    if (!send || !window.KMChat) return;
+    var st = box.querySelector('[data-r-chat]');
+    st.textContent = 'enviando ao ' + window.KMChat.provider().name + '…';
+    window.KMChat.send({
+      player: player || 'Alguém', kingdom: s.name, skill: k.name, activity: act ? act.name : '', die: die, modifier: t.total, dc: dc,
+      degree: deg[0], fame: !!fame, breakdown: t.parts.map(partText).join(' ').slice(0, 300), outcome: outcome
+    }).then(function (r) {
+      if (!st.isConnected) return;
+      st.textContent = r && r.ok ? '✔ enviado ao ' + window.KMChat.provider().name : '✖ não enviado: ' + ((r && r.error) || 'erro');
+    });
+  }
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest && ev.target.closest('[data-r-roll],[data-r-fame],[data-fi-rollskill]');
+    if (!t) return;
+    ev.preventDefault();
+    if (t.hasAttribute('data-fi-rollskill')) {
+      var k = skillById(t.getAttribute('data-fi-rollskill'));
+      if (k) U.showPanel('Teste do reino', k.name + (U.SKILL_PT[k.id] ? ' · ' + U.SKILL_PT[k.id] : ''), esc(k.ability || ''), rollerHtml(null, k.id));
+      return;
+    }
+    var box = t.closest('.roller');
+    if (box) doRoll(box, t.hasAttribute('data-r-fame'));
+  });
+
   // Verificação (index.html?check): referências da ficha que não existem nos dados
   function check() {
     var p = [];
@@ -436,6 +541,7 @@
 
   window.KMFicha = {
     view: view, bind: function () { }, check: check, blank: blank, fileText: fileText, normalize: normalize,
-    skillTotal: skillTotal, controlDC: controlDC, DRAFT_KEY: DRAFT_KEY, changed: changed
+    skillTotal: skillTotal, controlDC: controlDC, DRAFT_KEY: DRAFT_KEY, changed: changed,
+    rollerHtml: rollerHtml, degreeOf: degreeOf
   };
 })();

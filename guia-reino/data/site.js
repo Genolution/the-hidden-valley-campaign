@@ -8,6 +8,7 @@ window.KM = window.KM || {};
 //   deploysUrl  link opcional da página de deploys do provedor (aparece após publicar)
 //   upstream    repositório base do projeto (botão "Crie o seu" na vitrine)
 //   showcaseHost endereço da vitrine do projeto base: nesse endereço o Publicar fica desativado
+//   chat        opcional: serviço que recebe as rolagens ("discord"); o segredo fica numa variável de ambiente do provedor (.env.example)
 KM.site = {
   "repo": "",
   "branch": "main",
