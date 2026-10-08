@@ -308,8 +308,16 @@
   }
   function srcChip(e) {
     if (e.source !== 'campanha') return '';
-    return '<span class="chip campaign" title="' + esc('Conteúdo da campanha' + (e.sourceRef ? ' · ' + e.sourceRef : '')) + '">Campanha</span>' +
+    return '<span class="chip campaign" title="Conteúdo da campanha">Campanha</span>' +
       (e._inactive ? '<span class="chip inactive" title="' + esc('Oculto para os jogadores' + (e.condition ? ' · Ativa quando: ' + e.condition : '')) + '">Inativo</span>' : '');
+  }
+  // sourceRef: link http(s) vira "Ver card" para todos; texto livre (ex.: nome do PDF) só aparece no modo mestre
+  function sourceUrl(e) { var r = String(e.sourceRef || '').trim(); return /^https?:\/\/\S+$/i.test(r) ? r : ''; }
+  function sourceLinkChip(e) {
+    var u = sourceUrl(e);
+    if (!u) return '';
+    var host = u.replace(/^https?:\/\/(www\.)?/i, '').split(/[\/?#]/)[0];
+    return '<a class="chip source-link" href="' + esc(u) + '" target="_blank" rel="noopener noreferrer" title="' + esc(u) + '">Ver card ↗ <span class="muted">' + esc(host) + '</span></a>';
   }
   function bySource(list, v) {
     if (!v) return list;
@@ -423,13 +431,13 @@
     var sub = [];
     if (e.namePt && norm(e.namePt) !== norm(e.name)) sub.push(esc(e.namePt));
     if (e._kind === 'step' && e._phase) sub.push(esc(e._phase.namePt));
-    if (e.source === 'campanha') sub.push('<span class="page-ref">Conteúdo da campanha' + (e.sourceRef ? ' · ' + esc(e.sourceRef) : '') + '</span>');
+    if (e.source === 'campanha') sub.push('<span class="page-ref">Conteúdo da campanha' + (GM && e.sourceRef && !sourceUrl(e) ? ' · ' + esc(e.sourceRef) : '') + '</span>');
     else if (e.page) sub.push('<span class="page-ref">Player\'s Guide, p. ' + esc(e.page) + '</span>');
     $('#modal-sub').innerHTML = sub.join(' · ');
     $('#modal-back').hidden = modalStack.length < 2;
 
     var h = [];
-    var chips = srcChip(e);
+    var chips = srcChip(e) + sourceLinkChip(e);
     if (e._kind === 'activity') {
       stepsOf(e).forEach(function (s) { chips += '<span class="chip trait">' + esc(STEP_LABEL[s] || s) + '</span>'; });
     }

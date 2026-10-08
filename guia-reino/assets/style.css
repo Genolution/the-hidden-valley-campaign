@@ -142,6 +142,9 @@ table.ed-list tbody tr { cursor: default; }
   .ed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ed-row, .ed-row.bonus { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
+a.chip.source-link { color: var(--link); border-color: var(--link); text-decoration: none; font-weight: 600; }
+a.chip.source-link:hover { background: var(--accent-soft); }
+a.chip.source-link .muted { font-weight: 400; }
 .chip.campaign { background: transparent; color: var(--ph-event); border-color: var(--ph-event); text-transform: uppercase; font-size: 10.5px; letter-spacing: .05em; font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }
 

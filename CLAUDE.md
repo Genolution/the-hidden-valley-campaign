@@ -49,7 +49,7 @@ Projeto de longo prazo, evoluído em sessões. **Leia este arquivo primeiro e s�
 - **Estado no navegador** (`store()` → localStorage, chaves `km-*`): `km-kingdom` (perícias do reino), `km-act`, `km-st`, `km-war`, `km-open`, `km-theme`.
 - **Cliques:** qualquer elemento com `data-open="tipo:id"` abre o modal (delegação global); por isso links dentro de linhas de tabela abrem o alvo, não a linha.
 - **`selfCheck()`:** roda com `index.html?check` e despeja JSON em `<pre id="selfcheck">` (inclui `campaign`, `campaignInactive`, `duplicateIds`, `campaignUnknownKeys`).
-- **Repositório e deploy:** GitHub público `diego-duarte/pf2-easy-kingdom-management` (branch `main`). O Netlify publica a pasta `guia-reino/` (`netlify.toml`) a cada push. **Push = publicar para os jogadores**: só faça push com o ok do usuário. Todos os `*.pdf` ficam fora do Git (`.gitignore`: direitos da Paizo e spoilers).
+- **Repositório e deploy:** site em https://pf2-easy-kingdom-management.netlify.app/ (use `?mestre` para o modo mestre). GitHub público `diego-duarte/pf2-easy-kingdom-management` (branch `main`). O Netlify publica a pasta `guia-reino/` (`netlify.toml`) a cada push. **Push = publicar para os jogadores**: só faça push com o ok do usuário. Todos os `*.pdf` ficam fora do Git (`.gitignore`: direitos da Paizo e spoilers).
 - **Git:** instalado em `C:\Program Files\Git\cmd\git.exe` (terminais abertos antes da instalação não têm no PATH — use o caminho completo). Identidade configurada só no repo, com e-mail noreply do GitHub.
 
 ## Convenções

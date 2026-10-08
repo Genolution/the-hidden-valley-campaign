@@ -64,7 +64,8 @@ KM.campaign = {
 
 - Ao carregar, `app.js` anexa cada lista à coleção `KM.<chave>` de mesmo nome e marca os itens com `source: "campanha"`. Chave sem coleção correspondente aparece em `campaignUnknownKeys` no `?check`. As coleções de `KM.creation` (charters etc.) e `KM.turn` **não** são suportadas.
 - Na interface: selo **Campanha** (cartões, tabela de estruturas, modal), subtítulo "Conteúdo da campanha · <sourceRef>" no lugar da página do livro, título "Texto completo (campanha)" e filtro **Origem** (livro/campanha) nas abas Atividades e Estruturas.
-- Campos extras: `sourceRef` (texto livre: nome do PDF/handout; não use `page`), **`active`** e **`condition`**.
+- Campos extras: **`sourceRef`**, **`active`** e **`condition`** (não use `page`).
+- **`sourceRef`:** se for um link `http(s)://…` (ex.: o card no pf2 template tools), vira o botão **"Ver card ↗ <domínio>"** no modal, visível a todos e aberto em nova aba. Texto livre (ex.: `handout.pdf`) aparece só no modo mestre, no subtítulo do modal.
 - **Ativação:** só itens com `"active": true` entram no site. Os demais ficam cadastrados mas ocultos (nem busca, nem links: um `[[...]]` apontando para eles aparece como texto cinza). `condition` é uma anotação livre do que ativa o item.
 - **Modo mestre:** `index.html?mestre` (ex.: `?mestre#/estruturas`) carrega também os inativos, com selo "Inativo", a condição no topo do modal, banner no alto da página e a opção "campanha inativa" no filtro Origem. O `?check` também carrega tudo, para validar os inativos.
 - Oculto ≠ secreto: o `campanha.js` publicado é legível por quem abrir o arquivo.

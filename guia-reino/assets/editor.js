@@ -27,7 +27,8 @@
     '// Cada lista é anexada à coleção de mesmo nome (KM.activities, KM.structures, KM.feats, …)',
     '// ao carregar o app, e todos os itens recebem source = "campanha" (selo "Campanha" na interface).',
     '// Mesmo formato dos arquivos do livro; veja docs/modelo-de-dados.md (seção "Conteúdo da campanha").',
-    '// `page` não se aplica; use `sourceRef` para indicar de onde veio (ex.: nome do PDF/handout).',
+    '// `page` não se aplica. `sourceRef`: link do card (https://…), que vira o botão "Ver card" para os',
+    '// jogadores, ou texto livre como o nome do PDF (visível só no modo mestre).',
     '//',
     '// ATIVAÇÃO: o item só aparece no site com "active": true. Com false (ou sem o campo) fica oculto,',
     '// mas pode ser visto abrindo o site com ?mestre (ex.: index.html?mestre#/estruturas), com o selo',
@@ -149,7 +150,7 @@
     var steps = U.STEP_ORDER.map(function (s) { return [s, U.STEP_LABEL[s]]; });
     var h = section('Identificação') +
       inp('name', 'Nome (original)', e.name, { req: true }) + inp('namePt', 'Nome em português', e.namePt) +
-      inp('itemId', 'id', e.id, { hint: 'gerado do nome se vazio', ph: 'ex.: silken-diplomacy' }) + inp('sourceRef', 'Fonte (sourceRef)', e.sourceRef, { ph: 'ex.: handout.pdf' }) +
+      inp('itemId', 'id', e.id, { hint: 'gerado do nome se vazio', ph: 'ex.: silken-diplomacy' }) + inp('sourceRef', 'Fonte / link do card', e.sourceRef, { ph: 'https://… ou nome do arquivo', hint: 'link vira “Ver card”' }) +
       chk('active', 'Ativo (visível para os jogadores)', e.active === true) + inp('condition', 'Condição de ativação', e.condition, { wide: true }) +
       area('summary', 'Resumo (PT)', e.summary, 2, { req: true }) +
       section('Regras') +
@@ -212,7 +213,7 @@
     var c = e.cost || {}, k = e.construction || {};
     var h = section('Identificação') +
       inp('name', 'Nome (original)', e.name, { req: true }) + inp('namePt', 'Nome em português', e.namePt) +
-      inp('itemId', 'id', e.id, { hint: 'gerado do nome se vazio', ph: 'ex.: expedition-pavilion' }) + inp('sourceRef', 'Fonte (sourceRef)', e.sourceRef, { ph: 'ex.: handout.pdf' }) +
+      inp('itemId', 'id', e.id, { hint: 'gerado do nome se vazio', ph: 'ex.: expedition-pavilion' }) + inp('sourceRef', 'Fonte / link do card', e.sourceRef, { ph: 'https://… ou nome do arquivo', hint: 'link vira “Ver card”' }) +
       chk('active', 'Ativo (visível para os jogadores)', e.active === true) + inp('condition', 'Condição de ativação', e.condition, { wide: true }) +
       area('summary', 'Resumo (PT)', e.summary, 2, { req: true }) +
       section('Dados') +

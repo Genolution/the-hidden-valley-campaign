@@ -35,6 +35,8 @@ Ou, pelo terminal (da pasta acima): `powershell -NoProfile -ExecutionPolicy Bypa
 
 **Ativar conteúdo:** cada item da campanha só aparece com `"active": true`. Deixe tudo cadastrado com `false` e troque para `true` quando o item entrar em jogo. Para ver os inativos (selo **Inativo** + condição), abra o site com `?mestre` — ex.: `index.html?mestre#/estruturas`.
 
+**Link do card:** no campo **Fonte / link do card** (`sourceRef`), cole o link do card (ex.: do pf2 template tools). No site aparece o botão **Ver card ↗**, que abre o card numa nova aba.
+
 **Editar pelo site (modo mestre):** na faixa do topo, use **☰ Gerenciar campanha** (lista, ativar/desativar, editar, excluir), **+ Atividade** ou **+ Estrutura**; no modal de um item da campanha há **✎ Editar**. As mudanças valem na hora para você, mas ficam salvas só no seu navegador. Para os jogadores verem:
 1. clique em **⤓ Baixar campanha.js**;
 2. substitua `data/campanha.js` por esse arquivo;

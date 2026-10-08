@@ -3,6 +3,12 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-08 — link do card (`sourceRef`) + Netlify
+
+- `sourceRef` com URL `http(s)` vira o chip-link "Ver card ↗ <domínio>" no modal (todos os usuários; `target=_blank`, `rel=noopener`). Só URLs `http(s)` viram link (sem `javascript:`). Texto livre (nome do PDF) agora só aparece no modo mestre. Campo do editor renomeado para "Fonte / link do card".
+- O usuário cria os cards no pf2 template tools; a ideia é colar o link do card em cada item da campanha.
+- Netlify: site `https://pf2-easy-kingdom-management.netlify.app/` já serve a versão do repositório (conferido: `assets/editor.js` com `itemId`, `data/campanha.js` com `active`).
+
 ## 2026-10-08 — repositório no GitHub
 
 - Git for Windows instalado (winget). Repositório público `diego-duarte/pf2-easy-kingdom-management`, branch `main`, commit inicial `08b06b3`.
