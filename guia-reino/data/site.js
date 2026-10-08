@@ -9,10 +9,10 @@ window.KM = window.KM || {};
 //   upstream    repositório base do projeto (botão "Crie o seu" na vitrine)
 //   showcaseHost endereço da vitrine do projeto base: nesse endereço o Publicar fica desativado
 KM.site = {
-  "repo": "",
+  "repo": "Genolution/the-hidden-valley-campaign",
   "branch": "main",
   "root": "guia-reino",
-  "deploysUrl": "",
+  "deploysUrl": "https://app.netlify.com/projects/the-hidden-valey-campaign/deploys",
   "upstream": "diego-duarte/pf2-easy-kingdom-management",
   "showcaseHost": "pf2-easy-kingdom-management.netlify.app"
 };
