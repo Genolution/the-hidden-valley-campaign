@@ -256,7 +256,7 @@ KM.campaign = {
     {
       "id": "expedition-pavilion",
       "active": false,
-      "condition": "Liberada após o evento que introduz o pavilhão (defina aqui).",
+      "condition": "Liberada após a visita da Comitiva Lendas e Tesouros",
       "name": "Expedition Pavilion",
       "namePt": "Pavilhão de Expedições",
       "summary": "+1 em Claim Hex; permite ao assentamento usar a atividade Cívica Sponsor Expedition.",
@@ -289,7 +289,6 @@ KM.campaign = {
         "dc": 18,
         "text": "Trade DC 18"
       },
-      "requirements": null,
       "upgradeFrom": [],
       "upgradeTo": [],
       "ruin": null,
@@ -301,7 +300,8 @@ KM.campaign = {
           "note": "Claim Hex"
         }
       ],
-      "sourceRef": "expedition_pavilion.pdf"
+      "sourceRef": "expedition_pavilion.pdf",
+      "requirements": null
     }
   ]
 };
