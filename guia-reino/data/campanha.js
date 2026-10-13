@@ -207,7 +207,7 @@ KM.campaign = {
     },
     {
       "id": "sponsor-expedition",
-      "active": false,
+      "active": true,
       "condition": "Um [[structures:expeditionPavillon|Pavilhão de Expedição]] é construído em um assentamento",
       "name": "Sponsor Expedition",
       "namePt": "Patrocinar Expedição",
@@ -255,7 +255,7 @@ KM.campaign = {
   "structures": [
     {
       "id": "expedition-pavilion",
-      "active": false,
+      "active": true,
       "condition": "Liberada após a visita da Comitiva Lendas e Tesouros",
       "name": "Expedition Pavilion",
       "namePt": "Pavilhão de Expedições",
