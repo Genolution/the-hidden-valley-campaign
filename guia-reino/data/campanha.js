@@ -88,9 +88,9 @@ KM.campaign = {
       "oncePerTurn": false,
       "text": "*Note: This activity requires that Dante Chainlust is the Viceroy*\n\nDante leads scouts, hunting dogs, and cartographers to map safe paths, identify dens, and weaken threats in a hex to be cleared. Pay 1 RP and attempt an [[skill:exploration|Exploration]] or [[skill:wilderness|Wilderness]] check against the kingdown control DC.",
       "outcomes": {
-        "criticalSuccess": "As **success**, and if clearing this hex yields [[commodities:luxury|Luxury]] Commodities, increase the amount gained by 1.",
-        "success": "Scouts create secure routes and detailed reports about the threats in the hex. The [[activity:clearHex|Clear Hex]] activity on this hex during this Kingdom turn gains a +2 circumstance bonus (or a +4 circumstance bonus if the hex is unclaimed).",
-        "failure": "The mission relies on false information or fails to detect a major hazard. Future [[activity:clear_hex|Clear He]] activities on this hex suffer a -2 circumstance penalty."
+        "criticalSuccess": "As **success**, and if clearing this hex yields [[rule:commodities|Luxury]] Commodities, increase the amount gained by 1.",
+        "success": "Scouts create secure routes and detailed reports about the threats in the hex. The [[activity:clear-hex|Clear Hex]] activity on this hex during this Kingdom turn gains a +2 circumstance bonus (or a +4 circumstance bonus if the hex is unclaimed).",
+        "failure": "The mission relies on false information or fails to detect a major hazard. Future [[activity:clear-hex|Clear Hex]] activities on this hex suffer a -2 circumstance penalty."
       },
       "tags": [
         "downtime",
@@ -153,7 +153,7 @@ KM.campaign = {
       "outcomes": {
         "criticalSuccess": "As **Success** but your kingdom also recover's half of the RP spent on this activity (rounded up).",
         "success": "Your agents locate the cult's exact lair. You discover the cult's location and can now confront them during gameplay.",
-        "criticalFailure": "Your attempt backfires into a public panic or a deadly ambush. The kingdom gains 1 Ruin Point in whichever is lower between [[ruin:decay|Decay]] and [[ruin:strife|Strife]]."
+        "criticalFailure": "Your attempt backfires into a public panic or a deadly ambush. The kingdom gains 1 Ruin Point in whichever is lower between [[rule:ruin|Decay]] and [[rule:ruin|Strife]]."
       },
       "tags": [
         "downtime",
@@ -235,7 +235,7 @@ KM.campaign = {
         "criticalFailure": "A equipe falha em explorar o hex e é perdida"
       },
       "outcomes": {
-        "criticalSuccess": "The Entourage maps the area perfectly and puts on a spectacular show upon their return. The hex is Explored. The GM determines what the Entourage recovered based on the hidden contents of the hex. Typically, the kingdom gains 1d4 RP or 1 [[commodity:luxury|Luxury]] commodity. At the GM's discretion, the Entourage might return with a specific item, or their shady sales tactics might increase Unrest by 1.",
+        "criticalSuccess": "The Entourage maps the area perfectly and puts on a spectacular show upon their return. The hex is Explored. The GM determines what the Entourage recovered based on the hidden contents of the hex. Typically, the kingdom gains 1d4 RP or 1 [[rule:commodities|Luxury]] commodity. At the GM's discretion, the Entourage might return with a specific item, or their shady sales tactics might increase Unrest by 1.",
         "success": "The Entourage returns with accurate maps. The hex is Explored.",
         "failure": "Bad weather, getting lost, or fleeing from beasts forces the Entourage to retreat. The hex is not explored.",
         "criticalFailure": "Disaster strikes. The Entourage is ambushed or triggers a trap, losing members and returning empty-handed. The hex is not explored, and the kingdom loses 1 RP and gains 1 Unrest."
