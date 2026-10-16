@@ -1102,7 +1102,7 @@
     reino: { file: reinoFile, current: sheet, draft: reinoDraft },
     util: {
       esc: esc, kebab: kebab, store: store, clone: clone, skillList: skillList, rich: rich, showPanel: showPanel, closeModal: closeModal,
-      SKILL_PT: SKILL_PT, RANKS: RANKS, RANK_PT: RANK_PT, STEP_ORDER: STEP_ORDER, STEP_LABEL: STEP_LABEL
+      SKILL_PT: SKILL_PT, RANKS: RANKS, RANK_PT: RANK_PT, STEP_ORDER: STEP_ORDER, STEP_LABEL: STEP_LABEL, KIND_LABEL: KIND_LABEL
     }
   };
 

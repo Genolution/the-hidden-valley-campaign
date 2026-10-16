@@ -8,6 +8,11 @@ Formato *maior.menor.correção*: **maior** = mudança que exige ação de quem 
 (ou `git pull upstream main`). O provedor republica o site sozinho. Seus arquivos de dados
 (`campanha.js`, `reino.js`, `site.js`) não são alterados pelas atualizações.
 
+## 1.3.0 — 2026-10-16
+
+- **📖 Manual de edição** no editor do mestre (formulário e painel da campanha): gaveta lateral que fica aberta enquanto você edita, com a **checagem dos links** do item (links que não levam a nada, com sugestões e troca em um clique), **busca para inserir links** (o texto selecionado vira o rótulo) e a referência da formatação.
+- Ao salvar um item com link quebrado, o editor avisa e oferece abrir o manual.
+
 ## 1.2.0 — 2026-10-16
 
 - **Work Sites e Farmlands na ficha do reino:** a tabela de commodities ganhou a coluna *Work sites* (Lumber camps, Mines e Quarries em hex comum / em hex de Resource) e a produção *por turno*. Botão **⛏ Coletar commodities** (modo mestre) soma a produção ao estoque no Upkeep, respeitando o limite e avisando o que se perdeu (com Desfazer). As **Farmlands** agora têm campo próprio no Consumo (−1 cada).
