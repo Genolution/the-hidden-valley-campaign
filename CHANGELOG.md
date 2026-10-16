@@ -8,6 +8,11 @@ Formato *maior.menor.correção*: **maior** = mudança que exige ação de quem 
 (ou `git pull upstream main`). O provedor republica o site sozinho. Seus arquivos de dados
 (`campanha.js`, `reino.js`, `site.js`) não são alterados pelas atualizações.
 
+## 1.2.0 — 2026-10-16
+
+- **Work Sites e Farmlands na ficha do reino:** a tabela de commodities ganhou a coluna *Work sites* (Lumber camps, Mines e Quarries em hex comum / em hex de Resource) e a produção *por turno*. Botão **⛏ Coletar commodities** (modo mestre) soma a produção ao estoque no Upkeep, respeitando o limite e avisando o que se perdeu (com Desfazer). As **Farmlands** agora têm campo próprio no Consumo (−1 cada).
+- Fichas antigas continuam funcionando: os campos novos começam em 0.
+
 ## 1.1.0 — 2026-10-08
 
 - **Rolagem de testes do reino:** 🎲 em cada perícia da ficha e no modal de cada atividade (perícias aceitas, CD editável a partir da CD de Controle, grau de sucesso com críticos e 20/1 natural, texto do resultado, rerrolagem com Fama).
