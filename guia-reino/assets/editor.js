@@ -171,7 +171,8 @@
     h += '<div class="ed-bar">' +
       '<button type="button" class="btn btn-sm" data-ed-new="activities">+ Atividade</button>' +
       '<button type="button" class="btn btn-sm" data-ed-new="structures">+ Estrutura</button>' +
-      '<button type="button" class="btn btn-sm" data-ed-new="json">+ Outro tipo (JSON)</button><span class="sep"></span>' +
+      '<button type="button" class="btn btn-sm" data-ed-new="json">+ Outro tipo (JSON)</button>' +
+      '<button type="button" class="btn btn-sm" data-ed-help>📖 Manual de edição</button><span class="sep"></span>' +
       '<button type="button" class="btn btn-sm' + (dirty ? ' btn-primary' : '') + '" data-ed-apply>✔ Salvar e aplicar</button>' +
       '<button type="button" class="btn btn-sm' + (!dirty && A.campaign.draft ? ' btn-primary' : '') + '" data-ed-publish>☁ Publicar</button>' +
       '<button type="button" class="btn btn-sm" data-ed-download>⤓ Baixar campanha.js</button>' +
@@ -199,6 +200,7 @@
       (G.mode() === 'showcase' ? 'Na vitrine, vale só para este navegador.' : 'Os dois arquivos são publicados vazios; o conteúdo antigo continua no histórico do repositório.') + '</p>' +
       '<button type="button" class="btn btn-sm btn-danger" data-ed-new-campaign>⟲ Nova campanha</button>';
     U.showPanel('Modo mestre', 'Conteúdo da campanha', A.campaign.draft ? '<span class="gm-draft">Rascunho local não publicado</span>' : 'Igual ao arquivo publicado', h);
+    if (helpEl() && !helpEl().hidden) renderCheck();
   }
 
   /* ---------- formulário: atividade ---------- */
@@ -386,9 +388,12 @@
       '<button type="submit" class="btn btn-primary">✔ Salvar</button>' +
       '<button type="button" class="btn" data-ed-panel>Cancelar</button>' +
       (mode !== 'json' ? '<button type="button" class="btn" data-ed-as-json>{ } Editar como JSON</button>' : '') +
+      '<button type="button" class="btn" data-ed-help title="Links, formatação e checagem dos links deste item">📖 Manual de edição</button>' +
       '</div></form>';
     var title = idx >= 0 ? (e.name || e.id) : (mode === 'structure' ? 'Nova estrutura' : mode === 'activity' ? 'Nova atividade' : 'Novo item');
     U.showPanel('Modo mestre · ' + (idx >= 0 ? 'Editar' : 'Novo'), title, idx >= 0 ? esc(key + ' · ' + e.id) : 'Conteúdo da campanha', h);
+    lastField = null;
+    if (helpEl() && !helpEl().hidden) renderCheck();
   }
   function err(msg) { var d = document.getElementById('ed-err'); d.textContent = msg; d.hidden = false; d.scrollIntoView({ block: 'nearest' }); }
 
@@ -428,10 +433,138 @@
   function submit() {
     var r;
     try { r = buildFromForm(); } catch (x) { err(String(x)); return; }
+    var bl = brokenLinks();
+    if (bl.length && !confirm('Há ' + bl.length + ' link(s) que não levam a nenhum item:\n' + bl.map(function (b) { return b.code; }).join('\n') +
+      '\n\nOK = salvar assim mesmo · Cancelar = abrir o manual para corrigir')) { openHelp(); return; }
     if (!work[r.key]) work[r.key] = [];
     if (cur.idx >= 0 && r.key === cur.key) work[r.key][cur.idx] = r.o; else work[r.key].push(r.o);
     saveDraft('#/' + COLL[r.key][2] + '/' + COLL[r.key][0] + ':' + r.o.id);
   }
+
+  /* ---------- manual de edição (gaveta lateral; não fecha o formulário) ---------- */
+  var LINK_RE = /\[\[([a-z-]+):([^\]|]+)(?:\|([^\]]+))?\]\]/g; // mesmo formato do inline() do app.js
+  var lastField = null, broken = [], helpTimer = null;
+  function helpEl() { return document.getElementById('ed-help'); }
+  function textFields() { var f = form(); return f ? Array.prototype.slice.call(f.querySelectorAll('textarea, input[type=text]')) : []; }
+  function brokenLinks() {
+    var out = [];
+    textFields().forEach(function (el) {
+      String(el.value).replace(LINK_RE, function (m, k, id, label) {
+        if (!A.resolve(k, id.trim())) out.push({ el: el, code: m, id: id.trim(), label: label || '' });
+        return m;
+      });
+    });
+    return out;
+  }
+  function linkCode(e, label) { return '[[' + e._kind + ':' + e.id + (label && label !== e.name ? '|' + label : '') + ']]'; }
+  function kindLabel(k) { return U.KIND_LABEL[k] || k; }
+  // Sugestões para um link quebrado: busca pelo id (clearHex → "clear hex") e pelo rótulo
+  // Conceitos que não são itens próprios: a sugestão certa é a regra
+  var CONCEPTS = {
+    food: 'commodities', lumber: 'commodities', luxury: 'commodities', luxuries: 'commodities', ore: 'commodities', stone: 'commodities', commodity: 'commodities',
+    corruption: 'ruin', crime: 'ruin', decay: 'ruin', strife: 'ruin', fame: 'fame-and-infamy', infamy: 'fame-and-infamy',
+    rp: 'resource-points', 'work-site': 'work-sites', worksite: 'work-sites', worksites: 'work-sites'
+  };
+  function suggest(b) {
+    var seen = {}, out = [], c = CONCEPTS[b.id.toLowerCase()] || CONCEPTS[b.label.toLowerCase()];
+    if (c && A.resolve('rule', c)) { out.push(A.resolve('rule', c)); seen['rule:' + c] = 1; }
+    [b.id.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[-_:]+/g, ' '), b.label].forEach(function (q) {
+      if (q) A.search(q, 4).forEach(function (r) { var k = r.e._kind + ':' + r.e.id; if (!seen[k] && r.e._kind !== 'step') { seen[k] = 1; out.push(r.e); } });
+    });
+    return out.slice(0, 4);
+  }
+  function itemHtml(e, btns) {
+    return '<div class="eh-item"><div><b>' + esc(e.name) + '</b> <span class="muted">· ' + esc(kindLabel(e._kind)) + '</span><br><code>' + esc(linkCode(e)) + '</code></div>' + btns + '</div>';
+  }
+  function renderCheck() {
+    var box = document.getElementById('eh-check');
+    if (!box) return;
+    if (!form()) { box.innerHTML = '<p class="muted">Abra um item no editor para conferir os links dele.</p>'; return; }
+    broken = brokenLinks();
+    if (!broken.length) { box.innerHTML = '<p class="eh-ok">✔ Todos os links do formulário levam a um item.</p>'; return; }
+    box.innerHTML = broken.map(function (b, i) {
+      var sg = suggest(b);
+      return '<div class="eh-bad"><code>' + esc(b.code) + '</code> não leva a nenhum item.' +
+        (sg.length ? '<div class="muted">Trocar por:</div>' + sg.map(function (e, j) { return itemHtml(e, '<button type="button" class="btn btn-sm" data-eh-fix="' + i + '|' + j + '">Usar</button>'); }).join('')
+          : '<div class="muted">Sem sugestão: procure o item abaixo.</div>') + '</div>';
+    }).join('');
+  }
+  function renderResults() {
+    var q = document.getElementById('eh-q'), box = document.getElementById('eh-res');
+    if (!q || !box) return;
+    var res = q.value.trim() ? A.search(q.value, 12).filter(function (r) { return r.e._kind !== 'step'; }) : [];
+    box.innerHTML = !q.value.trim() ? '' : !res.length ? '<p class="muted">Nada encontrado.</p>' : res.map(function (r) {
+      return itemHtml(r.e, '<button type="button" class="btn btn-sm" data-eh-ins="' + esc(r.e._kind + ':' + r.e.id) + '" title="Insere no cursor do último campo de texto (o texto selecionado vira o rótulo)">Inserir</button>');
+    }).join('');
+  }
+  function openHelp() {
+    var el = helpEl();
+    if (!el) {
+      var kinds = ['activity', 'structure', 'rule', 'skill', 'feat', 'leader', 'army', 'tactic', 'waraction', 'condition'];
+      el = document.createElement('aside');
+      el.id = 'ed-help'; el.className = 'ed-help'; el.setAttribute('aria-label', 'Manual de edição');
+      el.innerHTML = '<div class="ed-help-head"><b>📖 Manual de edição</b><button type="button" class="btn btn-sm btn-ghost" data-eh-close title="Fechar">✕</button></div><div class="ed-help-body">' +
+        '<h4>Links neste formulário</h4><div id="eh-check"></div>' +
+        '<h4>Encontrar e inserir um link</h4><input type="search" id="eh-q" class="fi" placeholder="Nome em inglês ou português (ex.: clear hex, comida)">' +
+        '<div id="eh-res"></div><p class="muted sh-small">Clique no campo de texto onde o link deve entrar (ou selecione a palavra que vai virar o link), procure aqui e clique em <b>Inserir</b>.</p>' +
+        '<h4>Como escrever um link</h4>' +
+        '<p><code>[[tipo:id]]</code> mostra o nome do item; <code>[[tipo:id|texto]]</code> mostra o texto. Ex.: <code>[[activity:clear-hex|Clear Hex]]</code>.</p>' +
+        '<p>O <b>id</b> é o nome em minúsculas com hífens (o mesmo que aparece no endereço da página quando o item está aberto, depois de <code>tipo:</code>). Link para algo que não existe aparece sublinhado em vermelho.</p>' +
+        '<p>Tipos: ' + kinds.map(function (k) { return '<code>' + k + '</code> ' + esc(kindLabel(k)); }).join(' · ') + '.</p>' +
+        '<p>Conceitos como commodities, Ruin, Unrest, Fame, Consumption e terrenos são <b>regras</b>: <code>[[rule:commodities|Luxuries]]</code>, <code>[[rule:ruin|Decay]]</code>.</p>' +
+        '<h4>Formatação do texto</h4><table class="eh-fmt">' +
+        [['**negrito**', '<b>negrito</b>'], ['*itálico*', '<i>itálico</i>'], ['### Título', 'subtítulo'], ['- item', 'lista com marcadores'],
+          ['linha em branco', 'novo parágrafo'], ['| A | B |<br>|---|---|<br>| 1 | 2 |', 'tabela (2ª linha = cabeçalho)'],
+          ['Critical Success texto…', 'bloco de grau de sucesso (também Success, Failure, Critical Failure no início da linha)']].map(function (r) {
+          return '<tr><td><code>' + r[0] + '</code></td><td>' + r[1] + '</td></tr>';
+        }).join('') + '</table>' +
+        '<p class="muted sh-small">Campos completos de cada tipo: <code>docs/modelo-de-dados.md</code>.</p></div>';
+      document.body.appendChild(el);
+    }
+    el.hidden = false;
+    document.body.classList.add('ed-help-open');
+    renderCheck(); renderResults();
+  }
+  function closeHelp() { var el = helpEl(); if (el) el.hidden = true; document.body.classList.remove('ed-help-open'); }
+  function insertLink(e) {
+    var f = lastField;
+    if (!f || !document.body.contains(f)) {
+      var code = linkCode(e);
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code);
+      if (G && G.toast) G.toast('Nenhum campo de texto selecionado: <code>' + esc(code) + '</code> copiado para colar onde quiser.');
+      return;
+    }
+    var a = f.selectionStart, b = f.selectionEnd, v = f.value, code2 = linkCode(e, v.slice(a, b).trim() || e.name);
+    f.value = v.slice(0, a) + code2 + v.slice(b);
+    f.focus(); f.selectionStart = f.selectionEnd = a + code2.length;
+    renderCheck();
+  }
+  document.addEventListener('focusin', function (ev) {
+    var t = ev.target;
+    if (t.closest && t.closest('#ed-form') && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && t.type === 'text'))) lastField = t;
+  });
+  document.addEventListener('input', function (ev) {
+    if (ev.target.id === 'eh-q') { renderResults(); return; }
+    if (!helpEl() || helpEl().hidden || !ev.target.closest || !ev.target.closest('#ed-form')) return;
+    clearTimeout(helpTimer); helpTimer = setTimeout(renderCheck, 400);
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && ev.target.closest && ev.target.closest('#ed-help')) { ev.stopPropagation(); closeHelp(); }
+  }, true);
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest && ev.target.closest('[data-eh-close],[data-eh-ins],[data-eh-fix]');
+    if (!t) return;
+    ev.preventDefault();
+    var d = t.dataset;
+    if ('ehClose' in d) closeHelp();
+    else if ('ehIns' in d) { var p = d.ehIns.split(':'), e = A.resolve(p[0], p.slice(1).join(':')); if (e) insertLink(e); }
+    else if ('ehFix' in d) {
+      var q = d.ehFix.split('|'), b = broken[+q[0]], s = b && suggest(b)[+q[1]];
+      if (!s) return;
+      b.el.value = b.el.value.split(b.code).join(linkCode(s, b.label || s.name));
+      renderCheck();
+    }
+  });
 
   /* ---------- exportar ---------- */
   function download() { G.download('campanha.js', fileText()); }
@@ -449,11 +582,12 @@
 
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (ev) {
-    var t = ev.target.closest('[data-ed-panel],[data-ed-new],[data-ed-edit],[data-ed-del],[data-ed-apply],[data-ed-download],[data-ed-copy],[data-ed-discard],[data-ed-add-row],[data-ed-rm-row],[data-ed-gen-text],[data-ed-gen-stats],[data-ed-as-json],[data-ed-publish],[data-ed-new-campaign]');
+    var t = ev.target.closest('[data-ed-panel],[data-ed-new],[data-ed-edit],[data-ed-del],[data-ed-apply],[data-ed-download],[data-ed-copy],[data-ed-discard],[data-ed-add-row],[data-ed-rm-row],[data-ed-gen-text],[data-ed-gen-stats],[data-ed-as-json],[data-ed-publish],[data-ed-new-campaign],[data-ed-help]');
     if (!t) return;
     ev.preventDefault();
     var d = t.dataset;
-    if ('edPanel' in d) panel();
+    if ('edHelp' in d) { if (helpEl() && !helpEl().hidden) closeHelp(); else openHelp(); }
+    else if ('edPanel' in d) panel();
     else if ('edPublish' in d) publish();
     else if ('edNewCampaign' in d) newCampaign();
     else if ('edNew' in d) open(d.edNew, -1, d.edNew === 'json' ? 'json' : null);

@@ -3,6 +3,12 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-16 — v1.3.0: manual de edição no editor
+
+- Motivo: 6 links quebrados em atividades da campanha cadastradas pelo site (`commodities:luxury`, `activity:clearHex`, `ruin:decay`…), corrigidos no fork. **Decisão:** em vez de converter texto em link automaticamente (palavras comuns como Food/Decay/Success dariam falsos positivos), uma gaveta **📖 Manual de edição** com checagem dos links, sugestões, busca/inserção e a referência do mini-markdown; aviso ao salvar com link quebrado.
+- `KMApp.util.KIND_LABEL` exposto para o editor.
+- Testes headless: gaveta abre/fecha, 3 links quebrados detectados, sugestão `rule:commodities`/`activity:clear-hex`/`rule:ruin` em 1º, troca em um clique, busca + inserir com a seleção como rótulo, salvar com link quebrado → aviso e manual reaberto sem salvar. Print conferido.
+
 ## 2026-10-16 — v1.2.0: Work Sites e Farmlands na ficha
 
 - Pedido do usuário após a 1ª sessão de jogo com o site: registrar Work Sites e Farmlands na ficha. **Regra lembrada:** Farmland não produz Food; reduz o Consumo em 1 (se estiver na influência de um assentamento). Work Site: 1 Lumber/Ore/Stone por turno, 2 em hex de Resource (p. 43, 47).
