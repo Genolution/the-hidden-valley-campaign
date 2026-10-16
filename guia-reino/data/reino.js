@@ -6,15 +6,15 @@ window.KM = window.KM || {};
 KM.reino = {
   "name": "Valedouro",
   "level": 1,
-  "xp": 300,
+  "xp": 310,
   "capital": "Ursal",
   "charter": "open",
   "heartland": "hill-or-plain",
   "government": "yeomanry",
   "languages": "Comum",
-  "size": 2,
+  "size": 4,
   "fameType": "fame",
-  "fame": 0,
+  "fame": 3,
   "unrest": 0,
   "abilities": {
     "culture": 12,
@@ -51,15 +51,15 @@ KM.reino = {
   },
   "commodities": {
     "food": {
-      "stock": 3,
+      "stock": 2,
       "extra": 0
     },
     "lumber": {
-      "stock": 0,
+      "stock": 4,
       "extra": 0
     },
     "luxuries": {
-      "stock": 0,
+      "stock": 1,
       "extra": 0
     },
     "ore": {
@@ -67,7 +67,7 @@ KM.reino = {
       "extra": 0
     },
     "stone": {
-      "stock": 0,
+      "stock": 2,
       "extra": 0
     }
   },
@@ -126,13 +126,13 @@ KM.reino = {
     "exploration": 0,
     "folklore": 0,
     "industry": 0,
-    "intrigue": 0,
-    "magic": 0,
+    "intrigue": 1,
+    "magic": 1,
     "politics": 0,
     "scholarship": 0,
     "statecraft": 0,
-    "trade": 0,
-    "warfare": 0,
+    "trade": 1,
+    "warfare": 1,
     "wilderness": 1
   },
   "modifiers": [],
@@ -147,5 +147,5 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": ""
+  "notes": "+1 Food next turn\n1 Worksite de Madeira\n1 Worksite de Pedra"
 };
