@@ -73,7 +73,8 @@ KM.reino = {
   },
   "consumption": {
     "armies": 0,
-    "modifier": 0
+    "modifier": 0,
+    "farmland": 0
   },
   "leaders": {
     "ruler": {
@@ -147,5 +148,19 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": "+1 Food next turn\n1 Worksite de Madeira\n1 Worksite de Pedra"
+  "notes": "+1 Food next turn\n",
+  "worksites": {
+    "lumber": {
+      "normal": 1,
+      "resource": 0
+    },
+    "ore": {
+      "normal": 0,
+      "resource": 0
+    },
+    "stone": {
+      "normal": 1,
+      "resource": 0
+    }
+  }
 };
