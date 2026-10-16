@@ -335,6 +335,9 @@ table.sh-table tr.sh-vacant td { color: var(--ink-3); }
 .fi-chk { display: inline-flex; gap: 5px; align-items: center; font-size: 13.5px; }
 table.sh-table .fi-txt { width: 100%; min-width: 110px; }
 .sh-roll-btn { padding: 0 5px; font-size: 13px; }
+.sh-comms .fi-num { width: 56px; }
+.sh-comms th small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.sh-sites { white-space: nowrap; }
 /* Rolagem de testes (ficha.js) */
 .roller { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
 .roller .block-title { margin-top: 0 !important; margin-bottom: 8px; }

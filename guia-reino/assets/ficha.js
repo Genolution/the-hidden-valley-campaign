@@ -21,6 +21,8 @@
   var ABILS = [['culture', 'Culture', 'Cultura'], ['economy', 'Economy', 'Economia'], ['loyalty', 'Loyalty', 'Lealdade'], ['stability', 'Stability', 'Estabilidade']];
   var RUINS = [['corruption', 'Corruption', 'Corrupção', 'culture'], ['crime', 'Crime', 'Crime', 'economy'], ['decay', 'Decay', 'Decadência', 'stability'], ['strife', 'Strife', 'Discórdia', 'loyalty']];
   var COMMS = [['food', 'Food', 'Comida'], ['lumber', 'Lumber', 'Madeira'], ['luxuries', 'Luxuries', 'Luxos'], ['ore', 'Ore', 'Minério'], ['stone', 'Stone', 'Pedra']];
+  // Work Sites (p. 43, 47): commodity → tipo do site; 1 por turno, 2 em hex de Resource
+  var SITES = { lumber: 'Lumber camp', ore: 'Mine', stone: 'Quarry' };
   // CD de Controle por nível (p. 16)
   var CONTROL_DC = [14, 14, 15, 16, 18, 20, 22, 23, 24, 26, 27, 28, 30, 31, 32, 34, 35, 36, 38, 39, 40];
   // Tamanho (p. 38): [hexes mín., tipo, tipo PT, dado de recurso, mod. CD de Controle, estoque por commodity]
@@ -52,7 +54,9 @@
     var rd = obj(o, 'resourceDice'); rd.bonus = num(rd.bonus, 0); rd.penalty = num(rd.penalty, 0);
     var cm = obj(o, 'commodities');
     COMMS.forEach(function (c) { var x = obj(cm, c[0]); x.stock = num(x.stock, 0); x.extra = num(x.extra, 0); });
-    var cs = obj(o, 'consumption'); cs.armies = num(cs.armies, 0); cs.modifier = num(cs.modifier, 0);
+    var ws = obj(o, 'worksites');
+    Object.keys(SITES).forEach(function (c) { var x = obj(ws, c); x.normal = num(x.normal, 0); x.resource = num(x.resource, 0); });
+    var cs = obj(o, 'consumption'); cs.armies = num(cs.armies, 0); cs.farmland = num(cs.farmland, 0); cs.modifier = num(cs.modifier, 0);
     var ld = obj(o, 'leaders');
     leaders().forEach(function (l) {
       var x = obj(ld, l.id);
@@ -80,6 +84,7 @@
   var s = normalize(A.reino.current);           // mesmo objeto que o app.js usa para a disponibilidade das atividades
   var published = normalize(U.clone(A.reino.file || {}));
   var lastRoll = null;
+  var lastGather = null; // {before: {commodity: estoque}, got: [[commodity, ganho, perdido]]} — permite desfazer
 
   /* ---------- cálculos ---------- */
   function level() { return Math.max(1, Math.min(20, Math.floor(num(s.level, 1)))); }
@@ -99,7 +104,19 @@
   function storage(c) { return sizeInfo()[5] + s.commodities[c].extra; }
   function consumption() {
     var st = s.settlements.reduce(function (t, x) { return t + num(x.consumption, 0); }, 0);
-    return { settlements: st, total: Math.max(0, st + s.consumption.armies + s.consumption.modifier) };
+    return { settlements: st, total: Math.max(0, st + s.consumption.armies - s.consumption.farmland + s.consumption.modifier) };
+  }
+  function production(c) { var w = s.worksites[c]; return w ? w.normal + 2 * w.resource : 0; }
+  // Coleta do Upkeep (passo 3): o que passa do limite se perde (sem reduzir um estoque já acima dele)
+  function gatherPreview() {
+    return Object.keys(SITES).filter(function (c) { return production(c) > 0; }).map(function (c) {
+      var st = s.commodities[c].stock, p = production(c), next = Math.max(st, Math.min(storage(c), st + p));
+      return [c, next - st, p - (next - st)];
+    });
+  }
+  function commName(c) { for (var i = 0; i < COMMS.length; i++) if (COMMS[i][0] === c) return COMMS[i][1]; return c; }
+  function gatherText(list) {
+    return list.map(function (g) { return '+' + g[1] + ' ' + commName(g[0]) + (g[2] ? ' (' + g[2] + ' perdido' + (g[2] > 1 ? 's' : '') + ': limite)' : ''); }).join(' · ');
   }
   function leaderName(l) { return l.name + (l.namePt && l.namePt !== l.name ? ' (' + l.namePt + ')' : ''); }
   function abilityPt(key) { for (var i = 0; i < ABILS.length; i++) if (ABILS[i][0] === key) return ABILS[i][2]; return key; }
@@ -234,16 +251,30 @@
       '<div class="sh-roll"><button type="button" class="btn btn-sm btn-primary" data-fi-roll>🎲 Rolar ' + dice + '</button>' +
       (lastRoll ? ' <span class="sh-roll-res">' + esc(lastRoll.dice) + ': [' + lastRoll.rolls.join(', ') + '] = <b>' + lastRoll.total + '</b> RP</span>' +
         (GM ? ' <button type="button" class="btn btn-sm" data-fi-apply-roll title="Substitui o RP da ficha pelo total rolado">Aplicar ao RP</button>' : '') : '') + '</div>';
-    res += '<table class="sh-table"><thead><tr><th>Commodity</th><th>Estoque</th><th>Limite</th>' + (GM ? '<th title="Capacidade extra (estruturas como Granary, Lumberyard…)">+ extra</th>' : '') + '</tr></thead><tbody>' +
+    res += '<table class="sh-table sh-comms"><thead><tr><th>Commodity</th><th>Estoque</th><th>Limite</th>' + (GM ? '<th title="Capacidade extra (estruturas como Granary, Lumberyard…)">+ extra</th>' : '') +
+      '<th title="Work Sites: 1 por turno cada; 2 se estiver num hex de Resource dessa commodity"><a class="xref" data-open="rule:work-sites">Work sites</a> <small>comum / Resource</small></th><th title="Produção dos Work Sites, coletada no Upkeep">Por turno</th></tr></thead><tbody>' +
       COMMS.map(function (c) {
-        var x = s.commodities[c[0]], lim = storage(c[0]);
+        var x = s.commodities[c[0]], lim = storage(c[0]), w = s.worksites[c[0]], p = 'worksites.' + c[0] + '.';
         return '<tr><td>' + c[1] + ' <span class="muted">' + c[2] + '</span></td><td>' + fNum('commodities.' + c[0] + '.stock', x.stock, { min: 0 }) +
           (x.stock > lim ? ' <span class="chip warn" title="Acima do limite: o excedente se perde">acima</span>' : '') + '</td><td class="num">' + lim + '</td>' +
-          (GM ? '<td>' + fNum('commodities.' + c[0] + '.extra', x.extra, { min: 0 }) + '</td>' : '') + '</tr>';
+          (GM ? '<td>' + fNum('commodities.' + c[0] + '.extra', x.extra, { min: 0 }) + '</td>' : '') +
+          (w ? '<td class="sh-sites" title="' + attr(SITES[c[0]]) + '">' + fNum(p + 'normal', w.normal, { min: 0, title: SITES[c[0]] + ' em hex comum (1 por turno)' }) + ' / ' +
+            fNum(p + 'resource', w.resource, { min: 0, title: SITES[c[0]] + ' em hex de Resource (2 por turno)' }) + '</td>' +
+            '<td class="num">' + (production(c[0]) ? '<b>+' + production(c[0]) + '</b>' : '<span class="muted">0</span>') + '</td>'
+            : '<td class="muted">—</td><td class="num muted">—</td>') + '</tr>';
       }).join('') + '</tbody></table>';
+    var gp = gatherPreview();
+    if (gp.length || lastGather) {
+      res += '<div class="sh-roll">' +
+        (lastGather ? '<span>Coletado: ' + esc(gatherText(lastGather.got)) + '</span>' + (GM ? ' <button type="button" class="btn btn-sm" data-fi-ungather title="Volta o estoque ao que era antes da coleta">Desfazer</button>' : '')
+          : (GM ? '<button type="button" class="btn btn-sm btn-primary" data-fi-gather title="Soma a produção dos Work Sites ao estoque (Upkeep, passo 3)">⛏ Coletar commodities</button> ' : '<span class="muted">Work Sites no Upkeep:</span> ') +
+            '<span>' + esc(gatherText(gp)) + '</span>') + '</div>';
+    }
     res += row('<a class="xref" data-open="rule:consumption">Consumo</a> por turno', '<b class="sh-big">' + cons.total + '</b>',
-      'assentamentos ' + cons.settlements + ' + exércitos ' + s.consumption.armies + (s.consumption.modifier ? ' ' + signed(s.consumption.modifier) + ' ajuste' : '')) +
-      (GM ? row('Exércitos / ajuste', fNum('consumption.armies', s.consumption.armies, { min: 0 }) + ' / ' + fNum('consumption.modifier', s.consumption.modifier, { title: 'Ex.: −Farmlands, eventos' })) : '') +
+      'assentamentos ' + cons.settlements + ' + exércitos ' + s.consumption.armies + (s.consumption.farmland ? ' − Farmlands ' + s.consumption.farmland : '') + (s.consumption.modifier ? ' ' + signed(s.consumption.modifier) + ' ajuste' : '')) +
+      (GM ? row('Exércitos / <a class="xref" data-open="rule:farmland">Farmlands</a> / ajuste', fNum('consumption.armies', s.consumption.armies, { min: 0 }) + ' / ' +
+        fNum('consumption.farmland', s.consumption.farmland, { min: 0, title: 'Hexes de Farmland na área de influência de algum assentamento (−1 de consumo cada)' }) + ' / ' +
+        fNum('consumption.modifier', s.consumption.modifier, { title: 'Eventos do reino' })) : '') +
       (cons.total > s.commodities.food.stock ? '<div class="chip warn">Comida insuficiente para o consumo</div>' : '');
     h += box('Recursos', res, 'sh-res');
 
@@ -343,6 +374,7 @@
     else if (/^skills\./.test(el.getAttribute('data-f'))) w.o[w.k] = num(el.value, 0);
     else w.o[w.k] = el.value;
     if (/^settlements\.\d+\.type$/.test(el.getAttribute('data-f'))) w.o.consumption = settlementType(el.value)[3];
+    if (/^commodities\./.test(el.getAttribute('data-f'))) lastGather = null; // estoque editado à mão: não dá mais para desfazer a coleta
     save();
   }
   function roll() {
@@ -389,13 +421,24 @@
     setField(t);
   });
   document.addEventListener('click', function (ev) {
-    var t = ev.target.closest && ev.target.closest('[data-fi-roll],[data-fi-apply-roll],[data-fi-add],[data-fi-rm],[data-fi-publish],[data-fi-download],[data-fi-discard]');
+    var t = ev.target.closest && ev.target.closest('[data-fi-roll],[data-fi-apply-roll],[data-fi-gather],[data-fi-ungather],[data-fi-add],[data-fi-rm],[data-fi-publish],[data-fi-download],[data-fi-discard]');
     if (!t) return;
     ev.preventDefault();
     var d = t.dataset;
     if ('fiRoll' in d) { roll(); return; }
     if (!GM) return;
     if ('fiApplyRoll' in d && lastRoll) { s.rp = lastRoll.total; save(); }
+    else if ('fiGather' in d) {
+      var got = gatherPreview(), before = {};
+      if (!got.length) return;
+      got.forEach(function (g) { before[g[0]] = s.commodities[g[0]].stock; s.commodities[g[0]].stock += g[1]; });
+      lastGather = { before: before, got: got };
+      save();
+    } else if ('fiUngather' in d && lastGather) {
+      Object.keys(lastGather.before).forEach(function (c) { s.commodities[c].stock = lastGather.before[c]; });
+      lastGather = null;
+      save();
+    }
     else if ('fiAdd' in d) {
       if (d.fiAdd === 'modifiers') s.modifiers.push({ type: 'circumstance', value: 1, scope: 'all', note: '' });
       else if (d.fiAdd === 'settlements') s.settlements.push({ name: '', type: 'village', consumption: 1, notes: '' });

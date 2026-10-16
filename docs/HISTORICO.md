@@ -3,6 +3,13 @@
 Registro curto de cada sessão de edição: o que mudou, decisões tomadas e pendências.
 Entrada mais recente no topo. Datas absolutas (AAAA-MM-DD).
 
+## 2026-10-16 — v1.2.0: Work Sites e Farmlands na ficha
+
+- Pedido do usuário após a 1ª sessão de jogo com o site: registrar Work Sites e Farmlands na ficha. **Regra lembrada:** Farmland não produz Food; reduz o Consumo em 1 (se estiver na influência de um assentamento). Work Site: 1 Lumber/Ore/Stone por turno, 2 em hex de Resource (p. 43, 47).
+- **Decisão (usuário):** só contadores, sem lista de hexes — a localização é controlada no mapa, fora da ferramenta.
+- Esquema: `worksites.{lumber,ore,stone}.{normal,resource}` e `consumption.farmland` (o `modifier` fica para eventos). Tabela de commodities com colunas *Work sites* (comum / Resource) e *Por turno*; Consumo mostra `− Farmlands N`. **⛏ Coletar commodities** (mestre): soma ao estoque sem passar do limite (não reduz estoque já acima), mostra ganho e perda, **Desfazer** enquanto o estoque não for editado à mão (só na sessão). Jogadores veem a prévia da coleta.
+- Testes headless (10/10): produção +4 (2 comuns + 1 Resource), consumo Town 2 − 2 Farmlands = 0, prévia com perda, coleta (Lumber 6→8 com 2 perdidos, Stone 0→2), desfazer, edição de Ore, Food sem Work Site. Prints conferidos (mestre e jogador).
+
 ## 2026-10-08 — v1.1.0: rolagem de testes, Discord, ⚙ Configurações e versionamento
 
 - **Versionamento** (decisão do usuário): `assets/version.js` (`KM.version`, semver), `CHANGELOG.md` para usuários, tags `vX.Y.Z` (sem `gh` CLI aqui: Releases, se quiser, pelo site do GitHub). 1.0.0 = commit `8614d3a`; esta sessão = 1.1.0. Rodapé mostra a versão; modo mestre compara com `version.js` do upstream (API do GitHub, 1×/sessão) e avisa na faixa.

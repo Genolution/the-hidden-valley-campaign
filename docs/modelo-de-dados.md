@@ -88,7 +88,8 @@ Vem vazia no repositório base (nível 1, atributos 10, o resto 0/vazio).
 | `ruin` | `{corruption, crime, decay, strife}` → `{value, threshold, penalty}`; `penalty` = penalidade de item no atributo ligado (Culture, Economy, Stability, Loyalty) |
 | `resourceDice` | `{bonus, penalty}` → dados extras/a menos (total = nível + 4 + bônus − penalidade; dado pelo tamanho) |
 | `commodities` | `{food, lumber, luxuries, ore, stone}` → `{stock, extra}`; limite = estoque do tamanho + `extra` (estruturas) |
-| `consumption` | `{armies, modifier}`; total = soma do consumo dos assentamentos + `armies` + `modifier` |
+| `worksites` | `{lumber, ore, stone}` → `{normal, resource}`: nº de Work Sites em hex comum (1/turno) e em hex de Resource (2/turno); a ficha mostra a produção e o botão de coleta do Upkeep soma ao estoque (respeitando o limite) |
+| `consumption` | `{armies, farmland, modifier}`; total = soma do consumo dos assentamentos + `armies` − `farmland` (hexes de Farmland na influência de um assentamento) + `modifier` (eventos) |
 | `leaders` | id de `KM.leaders` → `{name, pc, invested}`; `name` vazio = cargo vago |
 | `skills` | id de `KM.skills` → grau 0–4 (destreinado … lendário); também decide a disponibilidade das atividades |
 | `modifiers` | `[{type: "status"\|"item"\|"circumstance"\|"untyped", value, scope: "all"\|"ability:<id>"\|"skill:<id>", note}]` |

@@ -6,7 +6,7 @@
 
 Referência rápida, em português, das regras de gerenciamento de reino do *Kingmaker Player's Guide* (Paizo), com:
 
-- **Ficha do reino** (aba *Reino*) mantida pelo mestre: atributos, ruína, Unrest, recursos (com rolagem dos Dados de Recurso), líderes, perícias com totais calculados (incluindo o bônus de cargo investido e a regra de não somar bônus do mesmo tipo), talentos e assentamentos;
+- **Ficha do reino** (aba *Reino*) mantida pelo mestre: atributos, ruína, Unrest, recursos (com rolagem dos Dados de Recurso, Work Sites com coleta das commodities e Farmlands no consumo), líderes, perícias com totais calculados (incluindo o bônus de cargo investido e a regra de não somar bônus do mesmo tipo), talentos e assentamentos;
 - **conteúdo próprio da campanha** (atividades, estruturas, talentos… fora do livro), com ativação item a item;
 - **modo mestre** (`?mestre`) que edita tudo pelo próprio site e **publica** com um commit no GitHub;
 - **rolagem dos testes do reino** (ficha e atividades), com envio opcional das rolagens ao **Discord**.
