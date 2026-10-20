@@ -6,7 +6,7 @@ window.KM = window.KM || {};
 KM.reino = {
   "name": "Valedouro",
   "level": 1,
-  "xp": 310,
+  "xp": 340,
   "capital": "Ursal",
   "charter": "open",
   "heartland": "hill-or-plain",
