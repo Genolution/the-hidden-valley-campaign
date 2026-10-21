@@ -15,7 +15,7 @@ KM.reino = {
   "size": 4,
   "fameType": "fame",
   "fame": 3,
-  "unrest": 2,
+  "unrest": 1,
   "abilities": {
     "culture": 12,
     "economy": 16,
@@ -24,12 +24,12 @@ KM.reino = {
   },
   "ruin": {
     "corruption": {
-      "value": 1,
+      "value": 2,
       "threshold": 10,
       "penalty": 0
     },
     "crime": {
-      "value": 0,
+      "value": 1,
       "threshold": 12,
       "penalty": 0
     },
@@ -44,18 +44,18 @@ KM.reino = {
       "penalty": 0
     }
   },
-  "rp": 1,
+  "rp": 6,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
   },
   "commodities": {
     "food": {
-      "stock": 3,
+      "stock": 2,
       "extra": 0
     },
     "lumber": {
-      "stock": 3,
+      "stock": 4,
       "extra": 0
     },
     "luxuries": {
@@ -67,7 +67,7 @@ KM.reino = {
       "extra": 0
     },
     "stone": {
-      "stock": 3,
+      "stock": 0,
       "extra": 0
     }
   },
@@ -148,7 +148,7 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": "+1 RD next turn\n+3 of Consumption next turn\n",
+  "notes": "+4 RD next turn\n",
   "worksites": {
     "lumber": {
       "normal": 1,
