@@ -15,7 +15,7 @@ KM.reino = {
   "size": 4,
   "fameType": "fame",
   "fame": 3,
-  "unrest": 1,
+  "unrest": 0,
   "abilities": {
     "culture": 12,
     "economy": 16,
@@ -55,7 +55,7 @@ KM.reino = {
       "extra": 0
     },
     "lumber": {
-      "stock": 2,
+      "stock": 3,
       "extra": 0
     },
     "luxuries": {
@@ -67,7 +67,7 @@ KM.reino = {
       "extra": 0
     },
     "stone": {
-      "stock": 2,
+      "stock": 3,
       "extra": 0
     }
   },
@@ -148,7 +148,7 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": "",
+  "notes": "+1 RD next turn",
   "worksites": {
     "lumber": {
       "normal": 1,
