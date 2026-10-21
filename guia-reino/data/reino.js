@@ -15,7 +15,7 @@ KM.reino = {
   "size": 4,
   "fameType": "fame",
   "fame": 3,
-  "unrest": 0,
+  "unrest": 1,
   "abilities": {
     "culture": 12,
     "economy": 16,
@@ -44,18 +44,18 @@ KM.reino = {
       "penalty": 0
     }
   },
-  "rp": 0,
+  "rp": 15,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
   },
   "commodities": {
     "food": {
-      "stock": 2,
+      "stock": 3,
       "extra": 0
     },
     "lumber": {
-      "stock": 4,
+      "stock": 2,
       "extra": 0
     },
     "luxuries": {
@@ -148,7 +148,7 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": "+1 Food next turn\n",
+  "notes": "",
   "worksites": {
     "lumber": {
       "normal": 1,
