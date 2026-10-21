@@ -6,7 +6,7 @@ window.KM = window.KM || {};
 KM.reino = {
   "name": "Valedouro",
   "level": 1,
-  "xp": 340,
+  "xp": 341,
   "capital": "Ursal",
   "charter": "open",
   "heartland": "hill-or-plain",
@@ -15,7 +15,7 @@ KM.reino = {
   "size": 4,
   "fameType": "fame",
   "fame": 3,
-  "unrest": 0,
+  "unrest": 2,
   "abilities": {
     "culture": 12,
     "economy": 16,
@@ -34,17 +34,17 @@ KM.reino = {
       "penalty": 0
     },
     "decay": {
-      "value": 0,
+      "value": 3,
       "threshold": 11,
       "penalty": 0
     },
     "strife": {
-      "value": 0,
+      "value": 3,
       "threshold": 11,
       "penalty": 0
     }
   },
-  "rp": 4,
+  "rp": 1,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
