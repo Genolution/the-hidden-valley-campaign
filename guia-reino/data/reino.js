@@ -24,7 +24,7 @@ KM.reino = {
   },
   "ruin": {
     "corruption": {
-      "value": 0,
+      "value": 1,
       "threshold": 10,
       "penalty": 0
     },
@@ -44,7 +44,7 @@ KM.reino = {
       "penalty": 0
     }
   },
-  "rp": 15,
+  "rp": 4,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
@@ -59,7 +59,7 @@ KM.reino = {
       "extra": 0
     },
     "luxuries": {
-      "stock": 1,
+      "stock": 2,
       "extra": 0
     },
     "ore": {
@@ -74,7 +74,7 @@ KM.reino = {
   "consumption": {
     "armies": 0,
     "modifier": 0,
-    "farmland": 0
+    "farmland": 1
   },
   "leaders": {
     "ruler": {
@@ -148,7 +148,7 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": "+1 RD next turn",
+  "notes": "+1 RD next turn\n+3 of Consumption next turn\n",
   "worksites": {
     "lumber": {
       "normal": 1,
