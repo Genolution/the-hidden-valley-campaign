@@ -15,7 +15,7 @@ KM.reino = {
   "size": 4,
   "fameType": "fame",
   "fame": 3,
-  "unrest": 1,
+  "unrest": 0,
   "abilities": {
     "culture": 12,
     "economy": 16,
@@ -44,7 +44,7 @@ KM.reino = {
       "penalty": 0
     }
   },
-  "rp": 0,
+  "rp": 12,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
@@ -55,7 +55,7 @@ KM.reino = {
       "extra": 0
     },
     "lumber": {
-      "stock": 4,
+      "stock": 1,
       "extra": 0
     },
     "luxuries": {
@@ -67,7 +67,7 @@ KM.reino = {
       "extra": 0
     },
     "stone": {
-      "stock": 0,
+      "stock": 1,
       "extra": 0
     }
   },
@@ -148,7 +148,7 @@ KM.reino = {
       "notes": ""
     }
   ],
-  "notes": "+4 RD next turn\n",
+  "notes": "-1 on Culture on the next kingdown turn.",
   "worksites": {
     "lumber": {
       "normal": 1,
