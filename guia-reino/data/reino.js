@@ -15,7 +15,7 @@ KM.reino = {
   "size": 4,
   "fameType": "fame",
   "fame": 3,
-  "unrest": 0,
+  "unrest": 5,
   "abilities": {
     "culture": 12,
     "economy": 16,
