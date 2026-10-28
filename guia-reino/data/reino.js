@@ -6,7 +6,7 @@ window.KM = window.KM || {};
 KM.reino = {
   "name": "Valedouro",
   "level": 1,
-  "xp": 346,
+  "xp": 381,
   "capital": "Ursal",
   "charter": "open",
   "heartland": "hill-or-plain",
@@ -39,12 +39,12 @@ KM.reino = {
       "penalty": 0
     },
     "strife": {
-      "value": 5,
+      "value": 8,
       "threshold": 11,
       "penalty": 0
     }
   },
-  "rp": 7,
+  "rp": 0,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
