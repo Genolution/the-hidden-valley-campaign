@@ -44,18 +44,18 @@ KM.reino = {
       "penalty": 0
     }
   },
-  "rp": 12,
+  "rp": 7,
   "resourceDice": {
     "bonus": 0,
     "penalty": 0
   },
   "commodities": {
     "food": {
-      "stock": 2,
+      "stock": 3,
       "extra": 0
     },
     "lumber": {
-      "stock": 1,
+      "stock": 2,
       "extra": 0
     },
     "luxuries": {
