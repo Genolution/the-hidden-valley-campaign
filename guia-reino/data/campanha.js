@@ -129,7 +129,7 @@ KM.campaign = {
     },
     {
       "id": "search-the-source",
-      "active": false,
+      "active": true,
       "condition": "Evento Whispers of the Chain ficar ativo",
       "name": "Search the Source",
       "namePt": "Encontrar a Origem",
